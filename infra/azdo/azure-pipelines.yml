@@ -1,0 +1,94 @@
+# The azdo pipeline (IAC-12). It plans every change to infra/azdo on main as
+# groundwerk-azdo, and applies that saved plan once you approve it in the azdo environment.
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - infra/azdo
+
+pool:
+  vmImage: ubuntu-24.04
+
+variables:
+  - group: azdo
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  - stage: plan
+    displayName: Plan
+    jobs:
+      - job: plan
+        displayName: Plan
+        steps:
+          - template: install-terraform.yml
+
+          - task: AzureCLI@2
+            name: tf
+            displayName: terraform plan
+            inputs:
+              azureSubscription: azdo
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(System.DefaultWorkingDirectory)/infra/azdo
+              inlineScript: |
+                set -euo pipefail
+                terraform init
+                status=0
+                terraform plan -out=tfplan -detailed-exitcode || status=$?
+                if [ "$status" -eq 1 ]; then exit 1; fi
+                if [ "$status" -eq 2 ]; then changes=true; else changes=false; fi
+                echo "##vso[task.setvariable variable=changes;isOutput=true]$changes"
+            env:
+              ARM_USE_OIDC: "true"
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+              SYSTEM_OIDCREQUESTURI: $(System.OidcRequestUri)
+              AZDO_ORG_SERVICE_URL: https://dev.azure.com/mikewicks-lab
+              TF_TOKEN_app_terraform_io: $(TF_TOKEN_app_terraform_io)
+
+          - publish: $(System.DefaultWorkingDirectory)/infra/azdo/tfplan
+            artifact: tfplan
+            displayName: Keep the plan for the Apply stage
+            condition: and(succeeded(), eq(variables['tf.changes'], 'true'))
+
+  # Skipped when the plan has no changes
+  - stage: apply
+    displayName: Apply
+    dependsOn: plan
+    condition: and(succeeded(), eq(dependencies.plan.outputs['plan.tf.changes'], 'true'))
+    jobs:
+      - deployment: apply
+        displayName: Apply
+        environment: azdo
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - download: current
+                  artifact: tfplan
+
+                - template: install-terraform.yml
+
+                - task: AzureCLI@2
+                  displayName: terraform apply
+                  inputs:
+                    azureSubscription: azdo
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    workingDirectory: $(System.DefaultWorkingDirectory)/infra/azdo
+                    inlineScript: |
+                      set -euo pipefail
+                      terraform init
+                      terraform apply "$(Pipeline.Workspace)/tfplan/tfplan"
+                  env:
+                    ARM_USE_OIDC: "true"
+                    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+                    SYSTEM_OIDCREQUESTURI: $(System.OidcRequestUri)
+                    AZDO_ORG_SERVICE_URL: https://dev.azure.com/mikewicks-lab
+                    TF_TOKEN_app_terraform_io: $(TF_TOKEN_app_terraform_io)
