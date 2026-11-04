@@ -31,7 +31,7 @@ stages:
             name: tf
             displayName: terraform plan
             inputs:
-              azureSubscription: azdo
+              azureSubscription: azdo-service-connection
               scriptType: bash
               scriptLocation: inlineScript
               workingDirectory: $(System.DefaultWorkingDirectory)/infra/azdo
@@ -78,7 +78,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: terraform apply
                   inputs:
-                    azureSubscription: azdo
+                    azureSubscription: azdo-service-connection
                     scriptType: bash
                     scriptLocation: inlineScript
                     workingDirectory: $(System.DefaultWorkingDirectory)/infra/azdo
