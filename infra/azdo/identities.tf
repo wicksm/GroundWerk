@@ -17,7 +17,8 @@ locals {
   admin_role_ids = "8e3af657-a8ff-443c-a75c-2fe8c4bcb635, f58310d9-a9f6-439a-9e8d-f62e7b41a168, 18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
 }
 
-# The azdo pipeline's identity, the most powerful in the project, so its apply waits for your approval
+# The azdo pipeline's identity, the most powerful in the project, so its apply waits for your approval.
+# It has no owners, so only an admin can change this registration or its federated credential.
 resource "azuread_application_registration" "azdo" {
   display_name = "groundwerk-azdo"
 
@@ -32,12 +33,6 @@ resource "azuread_service_principal" "azdo" {
   lifecycle {
     prevent_destroy = true
   }
-}
-
-# Owning its registration lets the pipeline keep it up to date
-resource "azuread_application_owner" "azdo" {
-  application_id  = azuread_application_registration.azdo.id
-  owner_object_id = azuread_service_principal.azdo.object_id
 }
 
 # No secret: the pipeline proves who it is with a short-lived token from the azdo service connection
