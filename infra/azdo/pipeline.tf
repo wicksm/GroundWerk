@@ -3,7 +3,7 @@
 
 resource "azuredevops_serviceendpoint_azurerm" "azdo" {
   project_id                             = data.azuredevops_project.groundwerk.id
-  service_endpoint_name                  = "azdo"
+  service_endpoint_name                  = "azdo-service-connection"
   description                            = "Signs the azdo pipeline in as groundwerk-azdo (IAC-12)"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = data.azuread_client_config.current.tenant_id
