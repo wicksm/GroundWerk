@@ -27,11 +27,14 @@ terraform {
 
 # By hand, these sign in as you: azuredevops as an admin with a PAT, and azuread and azurerm as
 # an admin through az login. From the pipeline, all three sign in as groundwerk-azdo
-# through the azdo service connection (IAC-12).
+# through azdo-service-connection (IAC-12).
 provider "azuredevops" {}
 
 provider "azuread" {}
 
 provider "azurerm" {
+  # azurerm registers no resource providers unless told to. The pool needs these two.
+  resource_providers_to_register = ["Microsoft.DevCenter", "Microsoft.DevOpsInfrastructure"]
+
   features {}
 }

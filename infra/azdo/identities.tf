@@ -35,7 +35,7 @@ resource "azuread_service_principal" "azdo" {
   }
 }
 
-# No secret: the pipeline proves who it is with a short-lived token from the azdo service connection
+# No secret: the pipeline proves who it is with a short-lived token from azdo-service-connection
 resource "azuread_application_federated_identity_credential" "azdo" {
   application_id = azuread_application_registration.azdo.id
   display_name   = "azdo-service-connection"
