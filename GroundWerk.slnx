@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GroundWerk.Application/GroundWerk.Application.csproj" />
+    <Project Path="src/GroundWerk.Contracts/GroundWerk.Contracts.csproj" />
+    <Project Path="src/GroundWerk.Database/GroundWerk.Database.sqlproj" Type="42ea0dbd-9cf1-443e-919e-be9c484e4577" />
+    <Project Path="src/GroundWerk.Domain/GroundWerk.Domain.csproj" />
+    <Project Path="src/GroundWerk.Host/GroundWerk.Host.csproj" />
+    <Project Path="src/GroundWerk.Infrastructure/GroundWerk.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GroundWerk.UnitTests/GroundWerk.UnitTests.csproj" />
+  </Folder>
+</Solution>

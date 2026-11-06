@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\GroundWerk.Domain\GroundWerk.Domain.csproj" />
+    <ProjectReference Include="..\GroundWerk.Contracts\GroundWerk.Contracts.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\GroundWerk.Application\GroundWerk.Application.csproj" />
+  </ItemGroup>
+</Project>

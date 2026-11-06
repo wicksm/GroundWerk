@@ -1,20 +1,11 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# GroundWerk
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+GroundWerk holds everything the Accounting team ships for supplier master data: the API and its Hangfire jobs, the ingestors, the poller and the outbox relay, the SQL database project, and the team's own Terraform, Helm charts, performance tests and API Management configuration. Code that only these apps share is a project in this solution, never a package, so a change to a table they share is one PR whose tests cover them all. What many teams consume by version has a repo of its own: GroundWerk.PipelineTemplates holds the pipeline templates, InnerSource the company-wide packages for auth, OpenTelemetry and the fake token issuer, and GroundWerk.Packages the packages something outside this repo consumes, while TerraformModules and ProducerStubs stand in for the platform team's modules and other teams' producers.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Build, test and run
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+You need the .NET 10 SDK. Build with `dotnet build GroundWerk.slnx` and test with `dotnet test --solution GroundWerk.slnx`. Run the Host with `dotnet run --project src/GroundWerk.Host`, which starts it as the API, or add `-- --Role=jobs` to start it as the jobs.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Working here
+
+AGENTS.md has the layout, the conventions, how branches, commits and PRs are named, and the Definitions of Done and Ready. docs/adr records each design decision and the alternative it was chosen over.
