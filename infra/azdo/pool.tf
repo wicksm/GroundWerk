@@ -48,7 +48,10 @@ resource "azurerm_managed_devops_pool" "pool" {
       parallelism = 1
     }
 
-    # Admins of all agent pools also administer this one, so the pipeline can change it later
+    # Inherit turns on inheritance for the project's copy of the pool only. The organization's
+    # copy got Project Collection Administrators, which includes groundwerk-azdo, as
+    # Administrator by hand on November 5, since the provider can't set it yet
+    # (terraform-provider-azuredevops issue 1609). Add that again by hand if the pool is recreated.
     permission {
       kind = "Inherit"
     }
@@ -65,6 +68,17 @@ resource "azurerm_managed_devops_pool" "pool" {
   }
 
   depends_on = [azuredevops_group_membership.azdo_reader]
+
+  # Azure reports the pool differently from how it's written here: it leaves out the admin
+  # permission, which is set only when the pool is created, and adds image aliases and empty
+  # tags. Without this, every plan would replace the pool.
+  lifecycle {
+    ignore_changes = [
+      azure_devops_organization[0].permission,
+      virtual_machine_scale_set_fabric[0].image[0].aliases,
+      tags,
+    ]
+  }
 }
 
 # The pool's queue in GroundWerk, which Azure DevOps gets when the pool is created. A pipeline
