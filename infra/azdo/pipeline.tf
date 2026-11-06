@@ -1,10 +1,10 @@
-# The azdo pipeline: it plans every change to infra/azdo on main as groundwerk-azdo,
-# and applies it after your approval (IAC-12)
+# Pipeline azdo-terraform: it plans every change on main to infra/azdo or its own YAML as
+# groundwerk-azdo, and applies it after your approval (IAC-12)
 
 resource "azuredevops_serviceendpoint_azurerm" "azdo" {
   project_id                             = data.azuredevops_project.groundwerk.id
   service_endpoint_name                  = "azdo-service-connection"
-  description                            = "Signs the azdo pipeline in as groundwerk-azdo (IAC-12)"
+  description                            = "Signs pipeline azdo-terraform in as groundwerk-azdo (IAC-12)"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   azurerm_spn_tenantid                   = data.azuread_client_config.current.tenant_id
   azurerm_subscription_id                = data.azurerm_subscription.current.subscription_id
@@ -34,7 +34,7 @@ resource "azuredevops_check_branch_control" "azdo_connection" {
 resource "azuredevops_variable_group" "azdo" {
   project_id   = data.azuredevops_project.groundwerk.id
   name         = "azdo"
-  description  = "Sign-in IDs for the azdo pipeline (IAC-12)"
+  description  = "Sign-in IDs for pipeline azdo-terraform (IAC-12)"
   allow_access = false
 
   variable {
@@ -60,13 +60,13 @@ resource "azuredevops_variable_group" "azdo" {
 
 resource "azuredevops_build_definition" "azdo" {
   project_id = data.azuredevops_project.groundwerk.id
-  name       = "azdo"
+  name       = "azdo-terraform"
 
   repository {
     repo_type   = "TfsGit"
     repo_id     = azuredevops_git_repository.repo["GroundWerk"].id
     branch_name = "refs/heads/main"
-    yml_path    = "infra/azdo/azure-pipelines.yml"
+    yml_path    = "pipelines/azdo-terraform.yml"
   }
 
   ci_trigger {

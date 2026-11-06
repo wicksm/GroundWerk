@@ -1,5 +1,5 @@
 # The identities the pipelines and the AI developer sign in as (IAC-12). an admin creates them
-# once by hand, and from then on the azdo pipeline manages them. The deploy pipelines'
+# once by hand, and from then on pipeline azdo-terraform manages them. The deploy pipelines'
 # identities come in phase 3, when something first deploys.
 
 data "azuread_client_config" "current" {}
@@ -17,7 +17,7 @@ locals {
   admin_role_ids = "8e3af657-a8ff-443c-a75c-2fe8c4bcb635, f58310d9-a9f6-439a-9e8d-f62e7b41a168, 18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
 }
 
-# The azdo pipeline's identity, the most powerful in the project, so its apply waits for your approval.
+# Pipeline azdo-terraform's identity, the most powerful in the project, so its apply waits for your approval.
 # It has no owners, so only an admin can change this registration or its federated credential.
 resource "azuread_application_registration" "azdo" {
   display_name = "groundwerk-azdo"

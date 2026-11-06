@@ -67,36 +67,12 @@ resource "azurerm_managed_devops_pool" "pool" {
   depends_on = [azuredevops_group_membership.azdo_reader]
 }
 
-# The pool's queue in GroundWerk, which Azure DevOps gets when the pool is created
+# The pool's queue in GroundWerk, which Azure DevOps gets when the pool is created. A pipeline
+# that runs on the pool needs an azuredevops_pipeline_authorization for it, added in this file.
 data "azuredevops_agent_queue" "pool" {
   project_id = data.azuredevops_project.groundwerk.id
   name       = azurerm_managed_devops_pool.pool.name
 
   # Read after the pool exists, not during the plan that creates it
   depends_on = [azurerm_managed_devops_pool.pool]
-}
-
-# pool-check runs one job on the pool to prove it works. You run it by hand.
-resource "azuredevops_build_definition" "pool_check" {
-  project_id = data.azuredevops_project.groundwerk.id
-  name       = "pool-check"
-
-  repository {
-    repo_type   = "TfsGit"
-    repo_id     = azuredevops_git_repository.repo["GroundWerk"].id
-    branch_name = "refs/heads/main"
-    yml_path    = "infra/azdo/pool-check.yml"
-  }
-
-  ci_trigger {
-    use_yaml = true
-  }
-}
-
-# Only the pipelines listed here may use the pool
-resource "azuredevops_pipeline_authorization" "pool_check" {
-  project_id  = data.azuredevops_project.groundwerk.id
-  type        = "queue"
-  resource_id = data.azuredevops_agent_queue.pool.id
-  pipeline_id = azuredevops_build_definition.pool_check.id
 }

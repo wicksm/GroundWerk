@@ -4,7 +4,7 @@
 
 locals {
   environments = {
-    azdo = "The azdo pipeline's apply waits here for your approval (IAC-12)"
+    azdo = "Pipeline azdo-terraform's apply waits here for your approval (IAC-12)"
     ci   = "Built each time you start work and torn down after (COST-3)"
     dv   = "Brought up on demand for dev testing (IAC-10)"
     qa   = "Merged code for the teams testing against it, from phase 5 (CICD-23)"
