@@ -11,6 +11,7 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 - `src/GroundWerk.Contracts`: the published event types and the AsyncAPI source. Other teams code against them, so they stay plain types.
 - `src/GroundWerk.Database`: the SQL project, one file per object, built into a dacpac. It owns the schema: EF Core maps to it and never creates or changes it, so there are no migrations and no EnsureCreated.
 - `src/GroundWerk.Host`: the one ASP.NET Core host, built into one image from one Dockerfile. Its Role setting, api or jobs, picks what a process runs (docs/adr/0002).
+- `src/GroundWerk.AppHost`: the Aspire AppHost, which is how to run the solution locally. It starts the Host as api and as jobs, and phase 2 adds SQL Server, Redis, the Event Hubs emulator and Azurite to it. It's for local runs and tests only, since deploys are Helm and Terraform (docs/adr/0003).
 - `src/GroundWerk.Workers.<Name>`: one project per worker as each arrives: ConnectIngestor, SyncIngestor, TenantIngestor, Poller and OutboxRelay. Workers use Microsoft.Data.SqlClient and never reference Infrastructure or its DbContext.
 - `tests/GroundWerk.UnitTests`, with `tests/GroundWerk.IntegrationTests` and `tests/GroundWerk.ContractTests` when they arrive, and k6 scripts in `perf/`.
 - `infra/azdo`: the Terraform that configures Azure DevOps, planned and applied by pipeline azdo-terraform. The service's own Terraform and its Helm charts get folders of their own under `infra/`.
@@ -18,12 +19,14 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 - `docs/adr`: one numbered file per design decision.
 - A folder holds one kind of thing, so a new kind of file gets a folder of its own rather than joining one that holds something else. A Terraform root's .tf files stay together in one folder, since Terraform reads only the folder it runs in. Names say what a thing is for: a pipeline is named for what it acts on and what it does.
 
-Project references point inward: Host references Infrastructure, Infrastructure references Application, and Application references Domain and Contracts. Domain and Contracts reference nothing.
+Project references point inward: Host references Infrastructure, Infrastructure references Application, and Application references Domain and Contracts. Domain and Contracts reference nothing. The AppHost references the projects it starts, and nothing references the AppHost.
 
 ## Build, test and run
 
 - Build with `dotnet build GroundWerk.slnx` and test with `dotnet test --solution GroundWerk.slnx`. Both must pass with no warnings before a PR. global.json pins the .NET 10 SDK and runs the tests on Microsoft Testing Platform, which is why `dotnet test` takes `--solution`.
-- Run the Host with `dotnet run --project src/GroundWerk.Host`, which starts it as the API. Add `-- --Role=jobs` to start it as the jobs.
+- Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`. It starts the Host as api and as jobs and prints a link to the Aspire dashboard, which shows each one's state, health and logs. Ctrl+C stops everything. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
+- Coding agents and scripts use the Aspire CLI instead, since that command runs until Ctrl+C. Run it as `dotnet dnx --yes aspire.cli@<version> -- <command> --apphost src/GroundWerk.AppHost --non-interactive --nologo`, with the version of Aspire.AppHost.Sdk in global.json, and the commands `start`, `wait <resource>`, `describe --format Json`, `logs <resource> --format Json` and `stop`. Without `--format Json`, describe and logs print nothing when their output isn't a terminal. Never show the dashboard's login link or a resource's environment, since they hold the dashboard's token and keys.
+- Never run `aspire publish` or `aspire deploy` (docs/adr/0003).
 
 ## Code
 

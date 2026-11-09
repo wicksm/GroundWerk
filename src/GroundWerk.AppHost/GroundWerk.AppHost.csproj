@@ -1,0 +1,9 @@
+<Project Sdk="Aspire.AppHost.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GroundWerk.Host\GroundWerk.Host.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/GroundWerk.AppHost/GroundWerk.AppHost.csproj" />
     <Project Path="src/GroundWerk.Application/GroundWerk.Application.csproj" />
     <Project Path="src/GroundWerk.Contracts/GroundWerk.Contracts.csproj" />
     <Project Path="src/GroundWerk.Database/GroundWerk.Database.sqlproj" Type="42ea0dbd-9cf1-443e-919e-be9c484e4577" />

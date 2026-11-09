@@ -4,7 +4,7 @@ GroundWerk holds everything the Accounting team ships for supplier master data: 
 
 ## Build, test and run
 
-You need the .NET 10 SDK. Build with `dotnet build GroundWerk.slnx` and test with `dotnet test --solution GroundWerk.slnx`. Run the Host with `dotnet run --project src/GroundWerk.Host`, which starts it as the API, or add `-- --Role=jobs` to start it as the jobs.
+You need the .NET 10 SDK. Build with `dotnet build GroundWerk.slnx` and test with `dotnet test --solution GroundWerk.slnx`. Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`, which starts the Host as the API and as the jobs and prints a link to the Aspire dashboard. The first build downloads the Aspire CLI into your NuGet cache. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
 
 ## Working here
 
