@@ -5,6 +5,7 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 ## Layout
 
 - `GroundWerk.slnx` is the one solution. Add each new project to it with `dotnet sln GroundWerk.slnx add`.
+- `build.cs`: the build script, which .NET 10 runs as a file-based app. Its Bullseye targets restore, build, test, pack and publish, so a pipeline's YAML only runs it (docs/adr/0005). Its `#:package` lines carry no versions, since those live in Directory.Packages.props.
 - `src/GroundWerk.Domain`: entities, value objects and the domain's rules, including the field enums that the database's overridable-field registry mirrors.
 - `src/GroundWerk.Application`: the handlers that the API and the jobs both call, validation and the unit of work.
 - `src/GroundWerk.Infrastructure`: the EF Core DbContext and its mappings, the interceptors and the outbox writer.
@@ -23,7 +24,8 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 
 ## Build, test and run
 
-- Build with `dotnet build GroundWerk.slnx` and test with `dotnet test --solution GroundWerk.slnx`. Both must pass with no warnings before a PR. global.json pins the .NET 10 SDK and runs the tests on Microsoft Testing Platform, which is why `dotnet test` takes `--solution`.
+- Build and test with `dotnet run build.cs`, the same command the pipelines run. It builds in Release, runs every test, packs, publishes the Host and the dacpac into artifacts/, and ends by printing the SDK, the version, the test count and the packages. It must pass with no warnings before a PR. `dotnet run build.cs -- test` stops after the tests, and `dotnet run build.cs -- --list-tree` shows every target and what it depends on. global.json pins the .NET 10 SDK and runs the tests on Microsoft Testing Platform, which is why `dotnet test` takes `--solution`.
+- Versions come from git tags through MinVer. A tag such as v1.2.0 makes its commit 1.2.0, and each later commit a pre-release of the next patch, such as 1.2.1-alpha.0.3 three commits on. MinVer needs the whole history and the tags, so build.cs stops in a shallow clone, and every pipeline checks out with `fetchDepth: 0` and `fetchTags: true` (docs/adr/0005).
 - Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`. It starts the Host as api and as jobs and prints a link to the Aspire dashboard, which shows each one's state, health and logs. Ctrl+C stops everything. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
 - Coding agents and scripts use the Aspire CLI instead, since that command runs until Ctrl+C. Run it as `dotnet dnx --yes aspire.cli@<version> -- <command> --apphost src/GroundWerk.AppHost --non-interactive --nologo`, with the version of Aspire.AppHost.Sdk in global.json, and the commands `start`, `wait <resource>`, `describe --format Json`, `logs <resource> --format Json` and `stop`. Without `--format Json`, describe and logs print nothing when their output isn't a terminal. Never show the dashboard's login link or a resource's environment, since they hold the dashboard's token and keys.
 - Never run `aspire publish` or `aspire deploy` (docs/adr/0003).
@@ -33,6 +35,7 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 - Directory.Build.props sets .NET 10, nullable reference types, implicit usings, the recommended analyzers and warnings as errors for every C# project, so project files don't repeat them. Fix a warning rather than suppress it, and never lower those settings.
 - Package versions live only in Directory.Packages.props. Add a package with `dotnet add <project> package <name>`, which records its version there.
 - Code that only this repo uses is a project reference, never a package.
+- build.cs packs only the projects in its packageProjects list, which stays empty until a project ships as a package.
 - File-scoped namespaces that match the folder.
 - Log through `[LoggerMessage]` source-generated methods, since the analyzers fail the build on calls such as `LogInformation`.
 - Generic names only: no company, product or customer names in code, configuration or docs, since main is mirrored to a public repo.

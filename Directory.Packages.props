@@ -3,11 +3,17 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Bullseye" Version="6.3.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="SimpleExec" Version="13.1.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Every project takes its version from git tags through MinVer (docs/adr/0005). -->
+    <GlobalPackageReference Include="MinVer" Version="8.0.0" />
   </ItemGroup>
 </Project>
