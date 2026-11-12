@@ -16,6 +16,28 @@ public class HostRoleParserTests
         Assert.Equal(HostRole.Jobs, HostRoleParser.Parse("JOBS"));
     }
 
+    [Theory]
+    [InlineData(" jobs ", HostRole.Jobs)]
+    [InlineData("API ", HostRole.Api)]
+    [InlineData("  Api", HostRole.Api)]
+    [InlineData("\tjobs\n", HostRole.Jobs)]
+    public void ParsesValueWithSurroundingSpaces(string value, HostRole expected)
+    {
+        Assert.Equal(expected, HostRoleParser.Parse(value));
+    }
+
+    [Theory]
+    [InlineData("   ")]
+    [InlineData("0")]
+    [InlineData("1")]
+    [InlineData("api,jobs")]
+    [InlineData("ap i")]
+    public void RejectsOtherValuesWithMessageShowingThem(string value)
+    {
+        var ex = Assert.Throws<InvalidOperationException>(() => HostRoleParser.Parse(value));
+        Assert.Equal($"Role must be api or jobs, but was '{value}'.", ex.Message);
+    }
+
     [Fact]
     public void RejectsEmptyStringWithMessageShowingIt()
     {

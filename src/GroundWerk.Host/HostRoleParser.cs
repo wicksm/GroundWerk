@@ -4,12 +4,14 @@ public static class HostRoleParser
 {
     public static HostRole Parse(string? value)
     {
-        if (string.Equals(value, "api", StringComparison.OrdinalIgnoreCase))
+        var trimmed = value?.Trim();
+
+        if (string.Equals(trimmed, "api", StringComparison.OrdinalIgnoreCase))
         {
             return HostRole.Api;
         }
 
-        if (string.Equals(value, "jobs", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(trimmed, "jobs", StringComparison.OrdinalIgnoreCase))
         {
             return HostRole.Jobs;
         }
