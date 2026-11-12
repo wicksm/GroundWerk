@@ -1,0 +1,63 @@
+# The AI developer (AI-5): takes one user story or bug tagged ai-developer to one PR. You run it by
+# hand from main with the item's ID. It signs in as groundwerk-ai-developer through the
+# ai-developer service connection, so it holds no secret. It can create branches and open PRs,
+# and it can't push to main or to anyone else's branch, or complete a PR (ADR 0006).
+
+trigger: none
+
+parameters:
+  - name: workItemId
+    displayName: User story or bug ID
+    type: number
+  - name: model
+    displayName: Model
+    type: string
+    default: claude-sonnet-5-5
+    values:
+      - claude-sonnet-5-5
+      - claude-opus-5-5
+
+pool: groundwerk-pool
+
+jobs:
+  - job: ai_developer
+    displayName: Take the item to a PR
+    timeoutInMinutes: 60
+    steps:
+      # The whole history and its tags, so the agent can read git log and the build's version
+      # comes out right
+      - checkout: self
+        fetchDepth: 0
+        fetchTags: true
+
+      # No .NET SDK install: global.json picks one of the image's .NET 10 SDKs
+      - task: UseNode@1
+        displayName: Install Node.js 24
+        inputs:
+          version: 24.x
+
+      # TEST-11's tests start SQL Server 2025 in Docker with Testcontainers, so the agent needs
+      # Docker to run them before it opens a PR
+      - script: |
+          docker info --format 'Docker {{.ServerVersion}}'
+          time docker pull --quiet mcr.microsoft.com/mssql/server:2025-latest
+        displayName: Check Docker and time the SQL Server image pull
+
+      # The lockfile pins every package, and no package's install script runs
+      - script: npm ci --omit=dev --ignore-scripts
+        displayName: Install the AI developer
+        workingDirectory: tools/ai-developer
+
+      - task: AzureCLI@3
+        displayName: Run the AI developer
+        timeoutInMinutes: 45
+        inputs:
+          connectionType: azureDevOps
+          azureDevOpsServiceConnection: ai-developer
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: node ai-developer.ts
+          workingDirectory: tools/ai-developer
+        env:
+          WORK_ITEM_ID: ${{ parameters.workItemId }}
+          MODEL: ${{ parameters.model }}

@@ -47,7 +47,7 @@ resource "azuredevops_branch_policy_comment_resolution" "main" {
   }
 }
 
-# Squash merges only, as at Avid (SDLC-8)
+# Squash merges only (SDLC-8)
 resource "azuredevops_branch_policy_merge_types" "main" {
   for_each   = azuredevops_git_repository.repo
   project_id = data.azuredevops_project.groundwerk.id

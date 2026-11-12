@@ -76,7 +76,8 @@ resource "azurerm_role_assignment" "azdo_role_assigner" {
   condition            = "((!(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${local.admin_role_ids}})) AND ((!(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAllValues:GuidNotEquals {${local.admin_role_ids}}))"
 }
 
-# The AI developer's identity, with no way to sign in until the AI-5 spike decides how
+# The AI developer's identity, which signs in only through the ai-developer service connection
+# (ai-developer.tf)
 resource "azuread_application_registration" "ai_developer" {
   display_name = "groundwerk-ai-developer"
 }

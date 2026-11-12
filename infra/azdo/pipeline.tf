@@ -29,8 +29,8 @@ resource "azuredevops_check_branch_control" "azdo_connection" {
   verify_branch_protection = true
 }
 
-# The IDs the pipeline signs in with, none of them secret. The HCP token is a secret variable you
-# add to the pipeline by hand, so it never reaches Terraform's state.
+# The IDs the pipeline signs in with, none of them secret, and the HCP token, a secret you add
+# to the group by hand so it never reaches Terraform's state
 resource "azuredevops_variable_group" "azdo" {
   project_id   = data.azuredevops_project.groundwerk.id
   name         = "azdo"
@@ -56,6 +56,22 @@ resource "azuredevops_variable_group" "azdo" {
     name  = "ARM_ADO_PIPELINE_SERVICE_CONNECTION_ID"
     value = azuredevops_serviceendpoint_azurerm.azdo.id
   }
+
+  lifecycle {
+    # Terraform leaves the variables alone once the group exists, so it keeps the HCP token
+    ignore_changes = [variable]
+  }
+}
+
+# Only a run from main may use the group, so a branch can't reach the HCP token. A push to any
+# branch can start this pipeline with that branch's copy of its YAML (ADR 0006).
+resource "azuredevops_check_branch_control" "azdo_variables" {
+  project_id               = data.azuredevops_project.groundwerk.id
+  display_name             = "Only main"
+  target_resource_id       = azuredevops_variable_group.azdo.id
+  target_resource_type     = "variablegroup"
+  allowed_branches         = "refs/heads/main"
+  verify_branch_protection = true
 }
 
 resource "azuredevops_build_definition" "azdo" {
@@ -71,11 +87,6 @@ resource "azuredevops_build_definition" "azdo" {
 
   ci_trigger {
     use_yaml = true
-  }
-
-  lifecycle {
-    # The HCP token is a variable you add by hand
-    ignore_changes = [variable]
   }
 }
 

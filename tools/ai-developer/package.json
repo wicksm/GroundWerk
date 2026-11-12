@@ -1,0 +1,23 @@
+{
+  "name": "ai-developer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Takes one user story or bug tagged ai-developer to one PR, headless, in the ai-developer pipeline (AI-5)",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node ai-developer.ts",
+    "check": "tsc",
+    "test": "node --test guard.test.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.318",
+    "@azure-devops/mcp": "2.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
+  }
+}

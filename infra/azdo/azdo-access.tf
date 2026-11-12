@@ -24,7 +24,7 @@ resource "azuredevops_group_membership" "azdo_admin" {
   }
 }
 
-# Its project permissions come with the AI-5 spike
+# Its permissions in GroundWerk are in ai-developer.tf
 resource "azuredevops_service_principal_entitlement" "ai_developer" {
   origin_id            = azuread_service_principal.ai_developer.object_id
   account_license_type = "express" # Basic

@@ -17,6 +17,8 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 - `tests/GroundWerk.UnitTests`, with `tests/GroundWerk.IntegrationTests` and `tests/GroundWerk.ContractTests` when they arrive, and k6 scripts in `perf/`.
 - `infra/azdo`: the Terraform that configures Azure DevOps, planned and applied by pipeline azdo-terraform. The service's own Terraform and its Helm charts get folders of their own under `infra/`.
 - `pipelines/`: one YAML file per pipeline, named after it, such as `azdo-terraform.yml`, with steps that more than one pipeline uses in `pipelines/templates`.
+- A pipeline that can reach a secret or a service connection keeps it behind an Only main check, since a push to any branch can start a pipeline with that branch's copy of its YAML (docs/adr/0006).
+- `tools/`: one folder per tool that a pipeline runs and that isn't part of the product. `tools/ai-developer` is the AI developer, which pipeline ai-developer runs to take one user story or bug tagged ai-developer to one PR (docs/adr/0006). Check and test it with `npm run check` and `npm test` in that folder.
 - `docs/adr`: one numbered file per design decision.
 - A folder holds one kind of thing, so a new kind of file gets a folder of its own rather than joining one that holds something else. A Terraform root's .tf files stay together in one folder, since Terraform reads only the folder it runs in. Names say what a thing is for: a pipeline is named for what it acts on and what it does.
 
@@ -55,6 +57,7 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 - Complete it with a squash merge whose message is `Merged PR <N>: ` followed by the PR's title, such as `Merged PR 5: Bug 49: Remove groundwerk-azdo's ownership of itself`, and delete the branch. Completing a PR doesn't close its work item.
 - Once the PR is completed and its work item closed, run `git fetch --prune` and delete the local branch with `git branch -D`. Check that the PR shows as completed first, since after a squash merge git can't tell the branch was merged.
 - A PR needs an approval from someone other than its author and its last pusher, and its comments resolved. Coding agents never approve or vote on a PR, bypass a policy or run a pipeline.
+- The AI developer creates branches and opens PRs as groundwerk-ai-developer, but it can't push to main or to a branch it didn't create, or complete a PR, so a person approves and completes its PRs. Tag a user story or bug ai-developer to let it take that item.
 
 ## Definitions of Ready and Done
 

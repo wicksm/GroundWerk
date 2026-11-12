@@ -90,3 +90,11 @@ data "azuredevops_agent_queue" "pool" {
   # Read after the pool exists, not during the plan that creates it
   depends_on = [azurerm_managed_devops_pool.pool]
 }
+
+# Pipeline ai-developer runs on the pool (ADR 0006)
+resource "azuredevops_pipeline_authorization" "ai_developer_pool" {
+  project_id  = data.azuredevops_project.groundwerk.id
+  type        = "queue"
+  resource_id = data.azuredevops_agent_queue.pool.id
+  pipeline_id = azuredevops_build_definition.ai_developer.id
+}
