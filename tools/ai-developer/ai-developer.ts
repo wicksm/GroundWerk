@@ -397,13 +397,13 @@ if (!links.value.some((link) => link.id === workItemId)) {
 }
 
 // The person who ran this pipeline reviews the PR, added with no vote as Microsoft's REST
-// reference shows
+// reference shows, and as a required reviewer, so the PR can't complete until they approve
 const reviewersPath = `${repoPath}/pullRequests/${pr.pullRequestId}/reviewers`;
-await azureDevOps(`${reviewersPath}/${reviewerId}?api-version=7.1`, "PUT", { vote: 0, id: reviewerId });
-const prReviewers = await azureDevOps<{ value: { displayName: string }[] }>(`${reviewersPath}?api-version=7.1`);
+await azureDevOps(`${reviewersPath}/${reviewerId}?api-version=7.1`, "PUT", { vote: 0, id: reviewerId, isRequired: true });
+const prReviewers = await azureDevOps<{ value: { id: string; displayName: string; isRequired?: boolean }[] }>(`${reviewersPath}?api-version=7.1`);
 
 const url = `https://dev.azure.com/${organization}/${encodeURIComponent(project)}/_git/${encodeURIComponent(repository)}/pullrequest/${pr.pullRequestId}`;
-const reviewers = prReviewers.value.map((reviewer) => reviewer.displayName).join(", ") || "none";
+const reviewers = prReviewers.value.map((reviewer) => `${reviewer.displayName}${reviewer.isRequired ? " (required)" : ""}`).join(", ") || "none";
 console.log(`PR ${pr.pullRequestId}: ${pr.title}\n${url}\nReviewers: ${reviewers}`);
 
 const summary = join(tempDir, "ai-developer-summary.md");
@@ -417,3 +417,8 @@ writeFileSync(
   ].join("\n"),
 );
 console.log(`##vso[task.uploadsummary]${summary}`);
+
+// The run fails if whoever ran it isn't the PR's required reviewer, after the summary shows the PR
+if (!prReviewers.value.some((reviewer) => reviewer.id.toLowerCase() === reviewerId.toLowerCase() && reviewer.isRequired)) {
+  fail(`PR ${pr.pullRequestId} is open, but Azure DevOps didn't make whoever ran the pipeline its required reviewer.`);
+}
