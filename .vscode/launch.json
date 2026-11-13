@@ -1,0 +1,13 @@
+// F5 starts the AppHost through the Aspire extension, which attaches the debugger to api and jobs
+// as it starts them.
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AppHost",
+      "type": "aspire",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/GroundWerk.AppHost/GroundWerk.AppHost.csproj"
+    }
+  ]
+}

@@ -4,7 +4,7 @@ GroundWerk holds everything the Accounting team ships for supplier master data: 
 
 ## Build, test and run
 
-You need the .NET 10 SDK. Build and test with `dotnet run build.cs`, the same command the pipelines run, which leaves the test results, any packages and the published Host and dacpac in artifacts/. Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`, which starts the Host as the API and as the jobs and prints a link to the Aspire dashboard. The first build downloads the Aspire CLI into your NuGet cache. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
+Work in the dev container, which has the .NET SDK and every tool this repo uses: on the dev VM, open the repo in VS Code and choose Reopen in Container (docs/adr/0007). Build and test with `dotnet run build.cs`, the same command the pipelines run, which leaves the test results, any packages and the published Host and dacpac in artifacts/. Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`, which starts the Host as the API and as the jobs and prints a link to the Aspire dashboard. In VS Code, F5 starts it with the debugger attached to both. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
 
 ## Working here
 

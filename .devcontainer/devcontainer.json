@@ -1,0 +1,50 @@
+// VS Code's dev container for GroundWerk, on the image that the pipelines' container jobs also
+// run in (docs/adr/0007).
+{
+  "name": "GroundWerk",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  // The image stays root for container jobs, so VS Code signs in as ubuntu instead.
+  "remoteUser": "ubuntu",
+  "features": {
+    // Docker commands and Testcontainers reach the dev VM's Docker through its socket. The image
+    // has its own pinned Docker CLI, so the feature only connects it, and adds no Compose.
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.10.2": {
+      "dockerDashComposeVersion": "none"
+    }
+  },
+  "mounts": [
+    // Claude Code's sign-in and settings, kept when the container is rebuilt.
+    "source=claude-code-config-${devcontainerId},target=/home/ubuntu/.claude,type=volume",
+    // NuGet's package cache, kept when the container is rebuilt.
+    "source=nuget-packages,target=/home/ubuntu/.nuget/packages,type=volume",
+    // The dev VM's Azure CLI sign-in, which az and the Azure DevOps MCP server use.
+    "source=${localEnv:HOME}/.azure,target=/home/ubuntu/.azure,type=bind",
+    // The hosts the dev VM's SSH already trusts, so git over SSH doesn't ask about Azure Repos.
+    "source=${localEnv:HOME}/.ssh/known_hosts,target=/home/ubuntu/.ssh/known_hosts,type=bind,readonly"
+  ],
+  "containerEnv": {
+    // Keeps all of Claude Code's state in the volume above.
+    "CLAUDE_CONFIG_DIR": "/home/ubuntu/.claude"
+  },
+  // Puts ubuntu's Aspire CLI on PATH for VS Code, its terminals and Claude Code. A container job
+  // doesn't read this file, so its AppHost build uses dnx instead (Dockerfile).
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/home/ubuntu/.dotnet/tools"
+  },
+  // Aspire labels the AppHost's ports for VS Code as it starts them: api's, jobs' and the
+  // dashboard's two. Every other port stays unforwarded.
+  "otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "microsoft-aspire.aspire-vscode",
+        "anthropic.claude-code"
+      ]
+    }
+  }
+}

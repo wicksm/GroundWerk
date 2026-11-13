@@ -6,6 +6,8 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 
 - `GroundWerk.slnx` is the one solution. Add each new project to it with `dotnet sln GroundWerk.slnx add`.
 - `build.cs`: the build script, which .NET 10 runs as a file-based app. Its Bullseye targets restore, build, test, pack and publish, so a pipeline's YAML only runs it (docs/adr/0005). Its `#:package` lines carry no versions, since those live in Directory.Packages.props.
+- `.devcontainer/`: the image that VS Code's dev container and the pipelines' container jobs run in, with every tool pinned and checked against its checksum, and the pre-commit hook that runs gitleaks (docs/adr/0007). A PR that moves Aspire.AppHost.Sdk in global.json moves ASPIRE_CLI_VERSION in its Dockerfile too.
+- `.vscode/launch.json`: F5 starts the AppHost through VS Code's Aspire extension, with the debugger attached to api and jobs.
 - `src/GroundWerk.Domain`: entities, value objects and the domain's rules, including the field enums that the database's overridable-field registry mirrors.
 - `src/GroundWerk.Application`: the handlers that the API and the jobs both call, validation and the unit of work.
 - `src/GroundWerk.Infrastructure`: the EF Core DbContext and its mappings, the interceptors and the outbox writer.
@@ -26,11 +28,13 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 
 ## Build, test and run
 
+- Work in the dev container: on the dev VM, open the repo in VS Code and choose Reopen in Container. After a change to `.devcontainer/`, run Dev Containers: Rebuild Container.
 - Build and test with `dotnet run build.cs`, the same command the pipelines run. It builds in Release, runs every test, packs, publishes the Host and the dacpac into artifacts/, and ends by printing the SDK, the version, the test count and the packages. It must pass with no warnings before a PR. `dotnet run build.cs -- test` stops after the tests, and `dotnet run build.cs -- --list-tree` shows every target and what it depends on. global.json pins the .NET 10 SDK and runs the tests on Microsoft Testing Platform, which is why `dotnet test` takes `--solution`.
 - Versions come from git tags through MinVer. A tag such as v1.2.0 makes its commit 1.2.0, and each later commit a pre-release of the next patch, such as 1.2.1-alpha.0.3 three commits on. MinVer needs the whole history and the tags, so build.cs stops in a shallow clone, and every pipeline checks out with `fetchDepth: 0` and `fetchTags: true` (docs/adr/0005).
 - Run the solution locally with `dotnet run --project src/GroundWerk.AppHost`. It starts the Host as api and as jobs and prints a link to the Aspire dashboard, which shows each one's state, health and logs. Ctrl+C stops everything. To run one role on its own, use `dotnet run --project src/GroundWerk.Host`, adding `-- --Role=jobs` for the jobs.
-- Coding agents and scripts use the Aspire CLI instead, since that command runs until Ctrl+C. Run it as `dotnet dnx --yes aspire.cli@<version> -- <command> --apphost src/GroundWerk.AppHost --non-interactive --nologo`, with the version of Aspire.AppHost.Sdk in global.json, and the commands `start`, `wait <resource>`, `describe --format Json`, `logs <resource> --format Json` and `stop`. Without `--format Json`, describe and logs print nothing when their output isn't a terminal. Never show the dashboard's login link or a resource's environment, since they hold the dashboard's token and keys.
+- Coding agents and scripts use the Aspire CLI instead, since that command runs until Ctrl+C. The dev container has it at the version of Aspire.AppHost.Sdk in global.json, so run it as `aspire <command> --apphost src/GroundWerk.AppHost --non-interactive --nologo`, with the commands `start`, `wait <resource>`, `describe --format Json`, `logs <resource> --format Json` and `stop`. Outside the dev container, use `dotnet dnx --yes aspire.cli@<version> --` in place of `aspire`, with that version. Without `--format Json`, describe and logs print nothing when their output isn't a terminal. Never show the dashboard's login link or a resource's environment, since they hold the dashboard's token and keys.
 - Never run `aspire publish` or `aspire deploy` (docs/adr/0003).
+- Give every endpoint the AppHost makes a fixed port, as api has 5291 and jobs 5292, so each run uses the same ports and the dev container's Ports tab lists only those.
 
 ## Code
 
@@ -41,13 +45,14 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 - File-scoped namespaces that match the folder.
 - Log through `[LoggerMessage]` source-generated methods, since the analyzers fail the build on calls such as `LogInformation`.
 - Generic names only: no company, product or customer names in code, configuration or docs, since main is mirrored to a public repo.
-- No secrets in the repo: no tokens, keys, passwords or connection strings that hold them. Configuration reads them from the environment or Key Vault.
+- No secrets in the repo: no tokens, keys, passwords or connection strings that hold them. Configuration reads them from the environment or Key Vault. The dev container's pre-commit hook refuses a commit that holds one, so take the secret out rather than skip the hook with `--no-verify`.
 - EF Core's mapping rules go in this file before the first entity.
 
 ## Tests
 
 - Every behavior change comes with tests.
 - Unit tests use xUnit v3. Test names say what they check, in PascalCase.
+- Tests reach a container that Testcontainers starts at its `Hostname` and mapped port, never at localhost, since in the dev container and in a container job, Docker runs outside the tests' own container (docs/adr/0007).
 
 ## Branches, commits and PRs
 

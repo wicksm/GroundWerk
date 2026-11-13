@@ -1,0 +1,4 @@
+#!/bin/sh
+# Refuses a commit whose staged changes hold a secret (GATE-6). The dev container's image ships
+# this hook and points git at it for every repo, so take the secret out rather than skip the hook.
+exec gitleaks git --pre-commit --staged --redact --verbose --no-banner --log-level warn
