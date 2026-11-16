@@ -3,6 +3,9 @@
 // A file-based app publishes with Native AOT by default. This script is only ever run, so
 // turning that off saves restoring the AOT compiler's packages.
 #:property PublishAot=false
+// A pipeline compiles this script while SonarQube Cloud's analysis records what MSBuild builds,
+// and the analysis is for the solution, not its build script.
+#:property SonarQubeExclude=true
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -52,8 +55,8 @@ Target("build", "Compile the solution in Release, the dacpac included", dependsO
     await RunAsync("dotnet", $"build {Solution} --configuration {Configuration} --no-restore");
 });
 
-Target("test", "Run every test project, with TRX results in artifacts/test-results", dependsOn: ["build"],
-    () => RunAsync("dotnet", $"test --solution {Solution} --configuration {Configuration} --no-build --results-directory {TestResults} --report-xunit-trx"));
+Target("test", "Run every test project, with TRX results and Cobertura coverage in artifacts/test-results", dependsOn: ["build"],
+    () => RunAsync("dotnet", $"test --solution {Solution} --configuration {Configuration} --no-build --results-directory {TestResults} --report-xunit-trx --coverage --coverage-output-format cobertura"));
 
 Target("pack", "Pack each project that ships as a NuGet package into artifacts/packages", dependsOn: ["build"], forEach: packageProjects,
     project => RunAsync("dotnet", $"pack {project} --configuration {Configuration} --no-build --output {Packages}"));

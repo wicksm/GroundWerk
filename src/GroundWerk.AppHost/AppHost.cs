@@ -11,4 +11,4 @@ builder.AddProject<Projects.GroundWerk_Host>("jobs", launchProfileName: null)
     .WithEnvironment("Role", "jobs")
     .WithHttpHealthCheck("/health");
 
-builder.Build().Run();
+await builder.Build().RunAsync();

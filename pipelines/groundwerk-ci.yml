@@ -1,0 +1,32 @@
+# Pipeline groundwerk-ci: GroundWerk's ci stage, from the template in
+# GroundWerk.PipelineTemplates at a release tag (CICD-1, CICD-3). It runs on each change to main,
+# and as main's PR build through the branch policy in infra/azdo/policies.tf, for any change
+# outside docs and Markdown files (CICD-10, docs/adr/0008).
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - docs
+      - '**/*.md'
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: GroundWerk.PipelineTemplates
+      ref: refs/tags/v1.0.0
+
+extends:
+  template: stages/ci.yml@templates
+  parameters:
+    # The dev container's image, as pipeline build-image pushed it
+    image: crgroundwerk.azurecr.io/groundwerk-dev@sha256:5befda8f701d87e41f23710bdbd7edb89d3b30da9f2489b2c772f25e5be731db
+    registryConnection: registry-pull
+    sonarConnection: sonarqube-cloud
+    sonarOrganization: mikewicks-lab
+    sonarProjectKey: mikewicks-lab_GroundWerk
+    # The AppHost only starts the apps on a dev machine, so no test runs it
+    sonarProperties: |
+      sonar.coverage.exclusions=**/GroundWerk.AppHost/**
