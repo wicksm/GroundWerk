@@ -12,7 +12,7 @@ Every service should set up telemetry, and later auth, the same way, from shared
 - Pipeline innersource-ci builds InnerSource from the ci template in GroundWerk.PipelineTemplates, from v1.1.0, which pushes a repo's packages when the repo names its feed. Each PR build pushes them as prereleases named for the PR and the run, such as 1.0.1-pr.12.345.1, so a consumer can try a change before it merges. A person releases by tagging main's merge commit with the next version, such as v1.1.0, and the tag's build pushes 1.1.0. A build of main pushes nothing.
 - A tag's build skips SonarQube Cloud's analysis, since main's build analyzed the same commit, and the Free plan would take the tag for a branch, which it doesn't analyze.
 - Pipelines sign in to the feed as the project's build service, GroundWerk Build Service, which has the feed's Feed Publisher role, through the template's NuGetAuthenticate step. The AI developer's pipeline restores before its agent starts and then empties that sign-in's token, so the agent still works only as groundwerk-ai-developer (docs/adr/0006).
-- In the dev container, the Azure Artifacts Credential Provider, a .NET tool in the image, signs a person in with a code they enter in a browser, once after each rebuild.
+- In the dev container, a command that needs the feed hands the Azure Artifacts Credential Provider, a .NET tool in the image, a one-hour token from the Azure CLI's sign-in, through VSS_NUGET_ACCESSTOKEN and VSS_NUGET_URI_PREFIXES, for that command only. NuGet's audit reads vulnerability data only from nuget.org, so a restore needs the feed only for an InnerSource version the package cache lacks.
 - innersource-ci may use registry-pull and sonarqube-cloud, as groundwerk-ci does, so ADR 0008's exception to ADR 0006 covers both pipelines.
 
 ## Alternatives considered
@@ -21,6 +21,7 @@ Every service should set up telemetry, and later auth, the same way, from shared
 - Project references from GroundWerk to InnerSource's code, which CODE-3 rules out, since a service would take every change at once.
 - Upstream sources on the feed, which would also store nuget.org's packages there, in the organization's 2 GiB of free storage.
 - A personal access token that each person makes, pastes into their NuGet config and renews by hand.
+- The credential provider's own sign-in. The tenant's security defaults block its code sign-in, its browser sign-in needs a display the container doesn't have, and it makes a 90-day personal access token in the person's account.
 
 ## Consequences
 
@@ -28,4 +29,4 @@ Every service should set up telemetry, and later auth, the same way, from shared
 - A version can't be replaced once it's in the feed, so a bad release is fixed with the next patch, and a version tag is never moved or deleted.
 - Each PR build adds prereleases to the feed, and nothing deletes them yet. A package of about 8 KB leaves the 2 GiB far off.
 - A merged change reaches consumers only when someone tags a release.
-- The dev container's sign-in makes a personal access token named Azure DevOps Artifacts Credential Provider in the person's account, valid for 90 days, and Azure DevOps emails them about it. The container keeps it until it's rebuilt, and the next sign-in makes another, so the older one can be revoked.
+- The token lives only in that command's environment and expires within the hour, so no personal access token is made and nothing in the container keeps one. A restore that needs a new InnerSource version fails with 401 until it's run with the token, and an agent in a pipeline, whose identity has no role on the feed, can't fetch one.

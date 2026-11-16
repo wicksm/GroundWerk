@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
+    <PackageReference Include="InnerSource.Telemetry" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GroundWerk.Infrastructure\GroundWerk.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

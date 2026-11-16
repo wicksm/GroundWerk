@@ -16,13 +16,13 @@ resources:
     - repository: templates
       type: git
       name: GroundWerk.PipelineTemplates
-      ref: refs/tags/v1.0.0
+      ref: refs/tags/v1.1.0
 
 extends:
   template: stages/ci.yml@templates
   parameters:
     # The dev container's image, as pipeline build-image pushed it
-    image: crgroundwerk.azurecr.io/groundwerk-dev@sha256:5befda8f701d87e41f23710bdbd7edb89d3b30da9f2489b2c772f25e5be731db
+    image: crgroundwerk.azurecr.io/groundwerk-dev@sha256:b38e8df3c90ba23a0926b10b1ef0cf6014f32bca382b85804cd66f6faa7c746c
     registryConnection: registry-pull
     sonarConnection: sonarqube-cloud
     sonarOrganization: mikewicks-lab

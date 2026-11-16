@@ -48,6 +48,19 @@ jobs:
         displayName: Install the AI developer
         workingDirectory: tools/ai-developer
 
+      # The agent can't sign in to Azure Artifacts, so the solution's packages are restored here as
+      # the pipeline's build service. The restore step then empties the token NuGetAuthenticate set
+      # for later steps, so the agent never gets it and works only as groundwerk-ai-developer
+      # (docs/adr/0009).
+      - task: NuGetAuthenticate@1
+        displayName: Sign in to Azure Artifacts
+
+      - script: |
+          set -e
+          dotnet restore GroundWerk.slnx
+          echo "##vso[task.setvariable variable=VSS_NUGET_ACCESSTOKEN]"
+        displayName: Restore the packages
+
       - task: AzureCLI@3
         displayName: Run the AI developer
         timeoutInMinutes: 45
