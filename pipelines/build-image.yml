@@ -1,0 +1,30 @@
+# Pipeline build-image builds the dev container's image from .devcontainer and pushes it to
+# crgroundwerk, tagged with its commit, on each change to the image on main (docs/adr/0008).
+# Pipelines pull the image by the digest this prints, and move to a new one through a PR.
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - .devcontainer/Dockerfile
+      - .devcontainer/git-hooks
+      - pipelines/build-image.yml
+
+pool:
+  vmImage: ubuntu-24.04
+
+steps:
+  - task: Docker@2
+    displayName: Sign in to crgroundwerk
+    inputs:
+      command: login
+      containerRegistry: registry-push
+
+  - bash: |
+      set -euo pipefail
+      image="crgroundwerk.azurecr.io/groundwerk-dev:$BUILD_SOURCEVERSION"
+      docker build --tag "$image" .devcontainer
+      docker push "$image"
+      echo "Digest: $(docker image inspect --format '{{index .RepoDigests 0}}' "$image")"
+    displayName: Build and push the image

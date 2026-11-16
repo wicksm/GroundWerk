@@ -33,8 +33,8 @@ provider "azuredevops" {}
 provider "azuread" {}
 
 provider "azurerm" {
-  # azurerm registers no resource providers unless told to. The pool needs these two.
-  resource_providers_to_register = ["Microsoft.DevCenter", "Microsoft.DevOpsInfrastructure"]
+  # azurerm registers no resource providers unless told to. The pool needs DevCenter and DevOpsInfrastructure, and the registry and its identities need ContainerRegistry and ManagedIdentity.
+  resource_providers_to_register = ["Microsoft.ContainerRegistry", "Microsoft.DevCenter", "Microsoft.DevOpsInfrastructure", "Microsoft.ManagedIdentity"]
 
   features {}
 }
