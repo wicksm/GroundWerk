@@ -113,6 +113,13 @@ ARG ASPIRE_CLI_VERSION=13.6.5
 USER ubuntu
 RUN dotnet tool install --global Aspire.Cli --version "${ASPIRE_CLI_VERSION}" \
     && ~/.dotnet/tools/aspire setup
+
+# The Azure Artifacts Credential Provider for ubuntu, so a restore in the dev container can sign in
+# to the innersource feed (docs/adr/0009). NuGet finds it on the PATH that devcontainer.json sets.
+# A container job's user signs in through the ci template's NuGetAuthenticate step instead.
+ARG CREDENTIAL_PROVIDER_VERSION=2.0.5
+RUN dotnet tool install --global Microsoft.Artifacts.CredentialProvider.NuGet.Tool \
+    --version "${CREDENTIAL_PROVIDER_VERSION}"
 USER root
 
 # The pre-commit hook that refuses a commit holding a secret (GATE-6), set for every repo in the

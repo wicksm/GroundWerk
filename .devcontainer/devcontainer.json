@@ -28,8 +28,9 @@
     // Keeps all of Claude Code's state in the volume above.
     "CLAUDE_CONFIG_DIR": "/home/ubuntu/.claude"
   },
-  // Puts ubuntu's Aspire CLI on PATH for VS Code, its terminals and Claude Code. A container job
-  // doesn't read this file, so its AppHost build uses dnx instead (Dockerfile).
+  // Puts ubuntu's Aspire CLI and Azure Artifacts Credential Provider on PATH for VS Code, its
+  // terminals and Claude Code. A container job doesn't read this file, so its AppHost build uses
+  // dnx instead, and it signs in to Azure Artifacts with NuGetAuthenticate (Dockerfile).
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/home/ubuntu/.dotnet/tools"
   },

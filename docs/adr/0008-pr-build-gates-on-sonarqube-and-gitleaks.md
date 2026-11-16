@@ -1,6 +1,6 @@
 # 8. The PR build runs in the dev image and gates on SonarQube Cloud and gitleaks
 
-Status: Accepted
+Status: Accepted, amended by ADR 0009, which lets pipeline innersource-ci use registry-pull and sonarqube-cloud too
 
 ## Context
 
