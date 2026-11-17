@@ -31,3 +31,27 @@ resource "azuredevops_git_repository" "repo" {
     prevent_destroy = true
   }
 }
+
+# No group may delete a branch by default, only the branch's creator, so a merged branch that the
+# AI developer pushed would stay. Project Administrators may delete any branch in GroundWerk,
+# where it pushes, except main, which no one in the group can delete or rewrite.
+resource "azuredevops_git_permissions" "admins_delete_branches" {
+  project_id    = data.azuredevops_project.groundwerk.id
+  repository_id = azuredevops_git_repository.repo["GroundWerk"].id
+  principal     = data.azuredevops_group.project_administrators.id
+  replace       = false # adds Force push and leaves the group's other permissions as they are
+  permissions = {
+    ForcePush = "Allow"
+  }
+}
+
+resource "azuredevops_git_permissions" "admins_keep_main" {
+  project_id    = data.azuredevops_project.groundwerk.id
+  repository_id = azuredevops_git_repository.repo["GroundWerk"].id
+  branch_name   = "refs/heads/main"
+  principal     = data.azuredevops_group.project_administrators.id
+  replace       = false
+  permissions = {
+    ForcePush = "Deny"
+  }
+}
