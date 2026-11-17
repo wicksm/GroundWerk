@@ -4,7 +4,9 @@
 # UTC. To announce a minimum, add an entry here through a PR, such as
 # { package = "InnerSource.Telemetry", minimum = "1.1.0", deadline = "2027-01-15" }.
 locals {
-  minimum_versions = []
+  minimum_versions = [
+    { package = "InnerSource.Telemetry", minimum = "1.0.1", deadline = "2026-11-17" },
+  ]
 }
 
 # Every pipeline may read the group, since it holds no secret and every pipeline on the ci
