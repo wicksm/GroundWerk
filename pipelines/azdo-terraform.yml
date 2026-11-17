@@ -30,7 +30,7 @@ stages:
         steps:
           - template: templates/install-terraform.yml
 
-          - task: AzureCLI@2
+          - task: AzureCLI@3
             name: tf
             displayName: terraform plan
             inputs:
@@ -78,7 +78,7 @@ stages:
 
                 - template: templates/install-terraform.yml
 
-                - task: AzureCLI@2
+                - task: AzureCLI@3
                   displayName: terraform apply
                   inputs:
                     azureSubscription: azdo-service-connection
