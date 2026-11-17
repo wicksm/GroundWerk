@@ -67,3 +67,41 @@ resource "azuredevops_area_permissions" "renovate" {
     WORK_ITEM_WRITE = "Allow"
   }
 }
+
+# The pipeline, which runs Renovate on its schedule and when you run it, both from main. It has no
+# CI trigger, so no push can start it, whatever the pushed branch's copy of its YAML says.
+resource "azuredevops_build_definition" "renovate" {
+  project_id = data.azuredevops_project.groundwerk.id
+  name       = "run-renovate"
+
+  repository {
+    repo_type   = "TfsGit"
+    repo_id     = azuredevops_git_repository.repo["GroundWerk"].id
+    branch_name = "refs/heads/main"
+    yml_path    = "pipelines/run-renovate.yml"
+  }
+}
+
+# The service connection you made by hand, since this provider can't make that type yet
+data "azuredevops_serviceendpoint_generic_v2" "renovate" {
+  project_id = data.azuredevops_project.groundwerk.id
+  name       = "renovate"
+}
+
+# Only a run from main may use the connection, so a branch can't borrow it
+resource "azuredevops_check_branch_control" "renovate_connection" {
+  project_id               = data.azuredevops_project.groundwerk.id
+  display_name             = "Only main"
+  target_resource_id       = data.azuredevops_serviceendpoint_generic_v2.renovate.id
+  target_resource_type     = "endpoint"
+  allowed_branches         = "refs/heads/main"
+  verify_branch_protection = true
+}
+
+# Only this pipeline may use the connection
+resource "azuredevops_pipeline_authorization" "renovate_connection" {
+  project_id  = data.azuredevops_project.groundwerk.id
+  type        = "endpoint"
+  resource_id = data.azuredevops_serviceendpoint_generic_v2.renovate.id
+  pipeline_id = azuredevops_build_definition.renovate.id
+}

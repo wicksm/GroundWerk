@@ -98,3 +98,11 @@ resource "azuredevops_pipeline_authorization" "ai_developer_pool" {
   resource_id = data.azuredevops_agent_queue.pool.id
   pipeline_id = azuredevops_build_definition.ai_developer.id
 }
+
+# Pipeline run-renovate runs on the pool (docs/adr/0010)
+resource "azuredevops_pipeline_authorization" "renovate_pool" {
+  project_id  = data.azuredevops_project.groundwerk.id
+  type        = "queue"
+  resource_id = data.azuredevops_agent_queue.pool.id
+  pipeline_id = azuredevops_build_definition.renovate.id
+}

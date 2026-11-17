@@ -1,0 +1,16 @@
+{
+  "name": "renovate-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renovate at a pinned version, which pipeline run-renovate runs to open upgrade PRs in Accounting's repos (CICD-17)",
+  "engines": {
+    "node": ">=24.11"
+  },
+  "scripts": {
+    "start": "renovate",
+    "check": "RENOVATE_X_IGNORE_RE2=true renovate-config-validator --strict config.js"
+  },
+  "dependencies": {
+    "renovate": "44.240.0"
+  }
+}

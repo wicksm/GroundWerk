@@ -1,0 +1,54 @@
+# Renovate (CICD-17): opens an upgrade PR in each of Accounting's repos when one of InnerSource's
+# packages, a release tag of GroundWerk.PipelineTemplates or a pipeline task has a new version,
+# as tools/renovate/config.js sets. It runs from main on a schedule, or when you run it. It signs
+# in as groundwerk-renovate through the renovate service connection, so it holds no secret. It
+# can create branches and open PRs, and it can't push to main or complete a PR (docs/adr/0010).
+
+trigger: none
+
+schedules:
+  - cron: '0 11 * * 1-5'
+    displayName: Weekdays at 11:00 UTC
+    branches:
+      include:
+        - main
+    always: true
+
+pool: groundwerk-pool
+
+jobs:
+  - job: renovate
+    displayName: Open upgrade PRs
+    timeoutInMinutes: 30
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      - task: UseNode@1
+        displayName: Install Node.js 24
+        inputs:
+          version: 24.x
+
+      # The lockfile pins every package, and no package's install script runs
+      - script: npm ci --ignore-scripts
+        displayName: Install Renovate
+        workingDirectory: tools/renovate
+
+      - task: AzureCLI@3
+        displayName: Run Renovate
+        timeoutInMinutes: 20
+        inputs:
+          connectionType: azureDevOps
+          azureDevOpsServiceConnection: renovate
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -e
+            token="$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken --output tsv)"
+            echo "##vso[task.setsecret]$token"
+            RENOVATE_TOKEN="$token" npm start
+          workingDirectory: tools/renovate
+        env:
+          RENOVATE_CONFIG_FILE: config.js
+          # No install script ran, so RE2, the regex engine Renovate would rather use, isn't built
+          RENOVATE_X_IGNORE_RE2: 'true'
