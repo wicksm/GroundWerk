@@ -1,6 +1,6 @@
-# The identities the pipelines and the AI developer sign in as (IAC-12). an admin creates them
-# once by hand, and from then on pipeline azdo-terraform manages them. The deploy pipelines'
-# identities come in phase 3, when something first deploys.
+# The identities the pipelines and the AI developer sign in as (IAC-12). an admin created the
+# first ones by hand, and pipeline azdo-terraform manages them all and creates the rest. The
+# deploy pipelines' identities come in phase 3, when something first deploys.
 
 data "azuread_client_config" "current" {}
 
@@ -92,4 +92,15 @@ resource "azuread_service_principal" "ai_developer" {
 resource "azuread_application_owner" "ai_developer" {
   application_id  = azuread_application_registration.ai_developer.id
   owner_object_id = azuread_service_principal.azdo.object_id
+}
+
+# Renovate's identity, which signs in only through the renovate service connection (renovate.tf).
+# groundwerk-azdo becomes the registration's owner when it creates it.
+resource "azuread_application_registration" "renovate" {
+  display_name = "groundwerk-renovate"
+}
+
+resource "azuread_service_principal" "renovate" {
+  client_id = azuread_application_registration.renovate.client_id
+  owners    = [azuread_service_principal.azdo.object_id]
 }
