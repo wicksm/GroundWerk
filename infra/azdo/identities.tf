@@ -57,7 +57,9 @@ resource "azuread_app_role_assignment" "azdo_graph" {
   resource_object_id  = data.azuread_service_principal.msgraph.object_id
 }
 
-# Builds what later stories need, starting with the Managed DevOps Pool
+# Builds what later stories need, starting with the Managed DevOps Pool. Contributor on the whole
+# subscription, since creating resource groups and registering providers needs that scope. It can't
+# grant access, which the role below does under its condition, and every apply waits for approval.
 resource "azurerm_role_assignment" "azdo_contributor" {
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"

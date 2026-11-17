@@ -13,4 +13,4 @@ HostLog.StartingAsRole(app.Logger, role);
 
 app.MapHealthChecks("/health");
 
-app.Run();
+await app.RunAsync();

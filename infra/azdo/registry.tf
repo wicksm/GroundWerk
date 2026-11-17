@@ -7,7 +7,9 @@ resource "azurerm_resource_group" "registry" {
   location = "eastus"
 }
 
-# No admin user and no anonymous pull, the defaults, so every sign-in goes through Entra ID
+# No admin user and no anonymous pull, the defaults, so every sign-in goes through Entra ID. Public
+# network access stays on, since private endpoints and network rules need Premium, and the registry
+# has no identity of its own, since it runs no tasks and customer-managed keys need Premium too.
 resource "azurerm_container_registry" "registry" {
   name                = "crgroundwerk"
   resource_group_name = azurerm_resource_group.registry.name

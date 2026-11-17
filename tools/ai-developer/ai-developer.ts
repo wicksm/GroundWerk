@@ -42,8 +42,14 @@ const BASH_COMMANDS = [
   "dotnet format",
 ];
 
+// A ##vso[ logging command's message is the rest of its line, so text from outside the program
+// goes into a command on one line, where a line break can't start a command of its own
+function oneLine(text: string): string {
+  return text.replaceAll(/[\r\n]+/g, " ");
+}
+
 function fail(message: string): never {
-  console.log(`##vso[task.logissue type=error]${message}`);
+  console.log(`##vso[task.logissue type=error]${oneLine(message)}`);
   process.exit(1);
 }
 
@@ -99,11 +105,13 @@ const dotnetFolder = dirname(realpathSync(dotnetOnPath));
 function entraToken(resource: string): string {
   let token = "";
   try {
+    // az comes from PATH. This runs only in the ai-developer pipeline from main, on a fresh agent,
+    // where anything that could put another az ahead of it could already run code in the job.
     token = execFileSync("az", ["account", "get-access-token", "--resource", resource, "--query", "accessToken", "--output", "tsv"], { encoding: "utf8" }).trim();
   } catch {
     fail(`The Azure CLI couldn't get a token for ${resource}.`);
   }
-  console.log(`##vso[task.setsecret]${token}`); // masks it in the rest of the log
+  console.log(`##vso[task.setsecret]${oneLine(token)}`); // masks it in the rest of the log
   return token;
 }
 
@@ -188,8 +196,8 @@ if (!exchange.ok) {
   fail(`Anthropic refused the Entra token (${exchange.status}: ${answer}). The Console's Workload identity page shows why under Authentication history.`);
 }
 const minted = (await exchange.json()) as { access_token: string; expires_in: number; scope: string };
-console.log(`##vso[task.setsecret]${minted.access_token}`);
-console.log(`Anthropic accepted the Entra token: scope ${minted.scope}, ${minted.expires_in} seconds.`);
+console.log(`##vso[task.setsecret]${oneLine(minted.access_token)}`);
+console.log("Anthropic accepted the Entra token.");
 
 // The item goes Active as work starts, as the board's rules say, with a link to this run
 const itemPath = `${encodeURIComponent(project)}/_apis/wit/workitems/${workItemId}`;

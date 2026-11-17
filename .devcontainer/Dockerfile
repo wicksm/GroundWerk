@@ -30,9 +30,9 @@ ARG DOCKER_CLI_VERSION=5:29.9.3-1~ubuntu.24.04~noble
 ARG MICROSOFT_ASC_SHA256=2fa9c05d591a1582a9aba276272478c262e95ad00acf60eaee1644d93941e3c6
 ARG DOCKER_ASC_SHA256=1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570
 RUN install -d -m 0755 /etc/apt/keyrings \
-    && curl -fsSLo /etc/apt/keyrings/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
+    && curl --proto '=https' -fsSLo /etc/apt/keyrings/microsoft.asc https://packages.microsoft.com/keys/microsoft.asc \
     && echo "${MICROSOFT_ASC_SHA256}  /etc/apt/keyrings/microsoft.asc" | sha256sum -c - \
-    && curl -fsSLo /etc/apt/keyrings/docker.asc https://download.docker.com/linux/ubuntu/gpg \
+    && curl --proto '=https' -fsSLo /etc/apt/keyrings/docker.asc https://download.docker.com/linux/ubuntu/gpg \
     && echo "${DOCKER_ASC_SHA256}  /etc/apt/keyrings/docker.asc" | sha256sum -c - \
     && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.asc] https://packages.microsoft.com/repos/azure-cli/ noble main" > /etc/apt/sources.list.d/azure-cli.list \
     && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" > /etc/apt/sources.list.d/docker.list \
@@ -43,14 +43,14 @@ RUN install -d -m 0755 /etc/apt/keyrings \
 # kubectl, for the AKS clusters.
 ARG KUBECTL_VERSION=1.37.2
 ARG KUBECTL_SHA256=c04487523e7aa7d1493f7808174c899db93d7a9cf57531420cd76b9bd415f8f4
-RUN curl -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+RUN curl --proto '=https' -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
     && echo "${KUBECTL_SHA256}  /usr/local/bin/kubectl" | sha256sum -c - \
     && chmod 0755 /usr/local/bin/kubectl
 
 # Helm, for the service's charts.
 ARG HELM_VERSION=4.3.1
 ARG HELM_SHA256=0403a88ae20913d11b10a2467b50087721fea7581736da6b9d3992f5357fe54b
-RUN curl -fsSLo /tmp/helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
+RUN curl --proto '=https' -fsSLo /tmp/helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
     && echo "${HELM_SHA256}  /tmp/helm.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/helm.tar.gz -C /usr/local/bin --strip-components=1 --no-same-owner linux-amd64/helm \
     && rm /tmp/helm.tar.gz
@@ -60,7 +60,7 @@ ARG TERRAFORM_VERSION=1.17.2
 ARG TERRAFORM_SHA256=e6f16b2f0b137ee5729caa8c4e79a3bae4ee261acd198a1fcfa8584a6296605b
 RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip \
-    && curl -fsSLo /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    && curl --proto '=https' -fsSLo /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
     && echo "${TERRAFORM_SHA256}  /tmp/terraform.zip" | sha256sum -c - \
     && unzip -q /tmp/terraform.zip terraform -d /usr/local/bin \
     && rm /tmp/terraform.zip \
@@ -70,7 +70,7 @@ RUN apt-get update \
 # k6, for the load tests in perf/.
 ARG K6_VERSION=2.3.0
 ARG K6_SHA256=39c3117b6af817592dcd0ce4242105c0a7af10948c2a425306f0be8f7a8a8ab1
-RUN curl -fsSLo /tmp/k6.tar.gz "https://github.com/grafana/k6/releases/download/v${K6_VERSION}/k6-v${K6_VERSION}-linux-amd64.tar.gz" \
+RUN curl --proto '=https' -fsSLo /tmp/k6.tar.gz "https://github.com/grafana/k6/releases/download/v${K6_VERSION}/k6-v${K6_VERSION}-linux-amd64.tar.gz" \
     && echo "${K6_SHA256}  /tmp/k6.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/k6.tar.gz -C /usr/local/bin --strip-components=1 --no-same-owner "k6-v${K6_VERSION}-linux-amd64/k6" \
     && rm /tmp/k6.tar.gz
@@ -78,7 +78,7 @@ RUN curl -fsSLo /tmp/k6.tar.gz "https://github.com/grafana/k6/releases/download/
 # Trivy, to scan images and dependencies for known vulnerabilities.
 ARG TRIVY_VERSION=0.76.1
 ARG TRIVY_SHA256=c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0
-RUN curl -fsSLo /tmp/trivy.tar.gz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+RUN curl --proto '=https' -fsSLo /tmp/trivy.tar.gz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
     && echo "${TRIVY_SHA256}  /tmp/trivy.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/trivy.tar.gz -C /usr/local/bin --no-same-owner trivy \
     && rm /tmp/trivy.tar.gz
@@ -86,7 +86,7 @@ RUN curl -fsSLo /tmp/trivy.tar.gz "https://github.com/aquasecurity/trivy/release
 # gitleaks, which the pre-commit hook below runs.
 ARG GITLEAKS_VERSION=8.30.1
 ARG GITLEAKS_SHA256=551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
-RUN curl -fsSLo /tmp/gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+RUN curl --proto '=https' -fsSLo /tmp/gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
     && echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin --no-same-owner gitleaks \
     && rm /tmp/gitleaks.tar.gz
@@ -94,7 +94,7 @@ RUN curl -fsSLo /tmp/gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/relea
 # Node.js, for tools/ai-developer and for npx to start the Azure DevOps MCP server in .mcp.json.
 ARG NODE_VERSION=24.22.3
 ARG NODE_SHA256=061ec3e3062115705b56b51fa9cc330ab50d34b6969387d4e4b1a50c6809acc2
-RUN curl -fsSLo /tmp/node.tar.gz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.gz" \
+RUN curl --proto '=https' -fsSLo /tmp/node.tar.gz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.gz" \
     && echo "${NODE_SHA256}  /tmp/node.tar.gz" | sha256sum -c - \
     && tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1 --no-same-owner "node-v${NODE_VERSION}-linux-x64/bin" "node-v${NODE_VERSION}-linux-x64/lib" \
     && rm /tmp/node.tar.gz
@@ -120,6 +120,8 @@ RUN dotnet tool install --global Aspire.Cli --version "${ASPIRE_CLI_VERSION}" \
 ARG CREDENTIAL_PROVIDER_VERSION=2.0.5
 RUN dotnet tool install --global Microsoft.Artifacts.CredentialProvider.NuGet.Tool \
     --version "${CREDENTIAL_PROVIDER_VERSION}"
+# Back to root, the image's user, since a container job's agent runs groupadd and other privileged
+# commands in it without sudo (Microsoft's docs). VS Code still works as ubuntu (devcontainer.json).
 USER root
 
 # The pre-commit hook that refuses a commit holding a secret (GATE-6), set for every repo in the

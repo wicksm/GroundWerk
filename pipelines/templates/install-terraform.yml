@@ -7,12 +7,14 @@ parameters:
 steps:
   - bash: |
       set -euo pipefail
-      v='${{ parameters.version }}'
+      v="$TERRAFORM_VERSION"
       cd "$(Agent.TempDirectory)"
-      curl -fsSLO "https://releases.hashicorp.com/terraform/${v}/terraform_${v}_linux_amd64.zip"
-      curl -fsSLO "https://releases.hashicorp.com/terraform/${v}/terraform_${v}_SHA256SUMS"
+      curl --proto '=https' -fsSLO "https://releases.hashicorp.com/terraform/${v}/terraform_${v}_linux_amd64.zip"
+      curl --proto '=https' -fsSLO "https://releases.hashicorp.com/terraform/${v}/terraform_${v}_SHA256SUMS"
       grep " terraform_${v}_linux_amd64.zip\$" "terraform_${v}_SHA256SUMS" | sha256sum -c -
       mkdir -p "$(Agent.ToolsDirectory)/terraform/${v}"
       unzip -o -q "terraform_${v}_linux_amd64.zip" -d "$(Agent.ToolsDirectory)/terraform/${v}"
       echo "##vso[task.prependpath]$(Agent.ToolsDirectory)/terraform/${v}"
-    displayName: Install Terraform ${{ parameters.version }}Í
+    displayName: Install Terraform ${{ parameters.version }}
+    env: # the version reaches the script as data, never as script text
+      TERRAFORM_VERSION: ${{ parameters.version }}

@@ -27,6 +27,7 @@ extends:
     sonarConnection: sonarqube-cloud
     sonarOrganization: mikewicks-lab
     sonarProjectKey: mikewicks-lab_GroundWerk
-    # The AppHost only starts the apps on a dev machine, so no test runs it
+    # Left out of coverage: the AppHost, which only starts the apps on a dev machine, so no test
+    # runs it, and tools, whose code build.cs doesn't test
     sonarProperties: |
-      sonar.coverage.exclusions=**/GroundWerk.AppHost/**
+      sonar.coverage.exclusions=**/GroundWerk.AppHost/**,tools/**
