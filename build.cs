@@ -69,7 +69,25 @@ Target("publish", "Publish the Host and copy the dacpac into artifacts/publish",
     File.Copy($"src/GroundWerk.Database/bin/{Configuration}/GroundWerk.Database.dacpac", $"{Publish}/GroundWerk.Database/GroundWerk.Database.dacpac");
 });
 
-Target("default", "Run test, pack and publish, then print what two runs of a commit should share", dependsOn: ["test", "pack", "publish"], async () =>
+Target("check", "Check that every tracked text file ends with a newline, as .editorconfig asks", async () =>
+{
+    // .editorconfig asks for a newline at the end of every file, but only editors that read it add
+    // one, and without it the next lines added at a file's end show its last line as changed too.
+    var (tracked, _) = await ReadAsync("git", "ls-files -z");
+    var missing = tracked.Split('\0', StringSplitOptions.RemoveEmptyEntries)
+        .Where(file => File.Exists(file) && LacksFinalNewline(File.ReadAllBytes(file)))
+        .ToList();
+    if (missing.Count > 0)
+    {
+        throw new InvalidOperationException($"These files don't end with a newline, as .editorconfig asks: {string.Join(", ", missing)}");
+    }
+
+    // An empty file has no last line, and a NUL byte marks a binary file, such as an image.
+    static bool LacksFinalNewline(byte[] bytes) =>
+        bytes.Length > 0 && Array.IndexOf(bytes, (byte)0) < 0 && bytes[^1] != (byte)'\n';
+});
+
+Target("default", "Run check, test, pack and publish, then print what two runs of a commit should share", dependsOn: ["check", "test", "pack", "publish"], async () =>
 {
     var (sdk, _) = await ReadAsync("dotnet", "--version");
     var version = FileVersionInfo.GetVersionInfo($"{Publish}/GroundWerk.Host/GroundWerk.Host.dll").ProductVersion;

@@ -42,6 +42,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "editorconfig.editorconfig",
         "ms-dotnettools.csdevkit",
         "microsoft-aspire.aspire-vscode",
         "anthropic.claude-code"
