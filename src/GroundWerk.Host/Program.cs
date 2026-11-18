@@ -9,7 +9,7 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-HostLog.StartingAsRole(app.Logger, role);
+HostLog.Starting(app.Logger, HostVersion.Current, role);
 
 app.MapHealthChecks("/health");
 
