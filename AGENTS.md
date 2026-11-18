@@ -48,6 +48,7 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 - build.cs packs only the projects in its packageProjects list, which stays empty until a project ships as a package.
 - File-scoped namespaces that match the folder.
 - Log through `[LoggerMessage]` source-generated methods, since the analyzers fail the build on calls such as `LogInformation`.
+- Remove unused using directives from the files you change, since the build doesn't flag them.
 - The Host sets up OpenTelemetry with `builder.AddTelemetry()` from the InnerSource.Telemetry package, so a `[LoggerMessage]` method's values become fields of its log record, and each role's traces, metrics and logs show on the AppHost's dashboard.
 - Generic names only: no company, product or customer names in code, configuration or docs, since main is mirrored to a public repo.
 - No secrets in the repo: no tokens, keys, passwords or connection strings that hold them. Configuration reads them from the environment or Key Vault. The dev container's pre-commit hook refuses a commit that holds one, so take the secret out rather than skip the hook with `--no-verify`.
