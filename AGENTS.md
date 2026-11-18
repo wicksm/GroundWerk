@@ -8,6 +8,7 @@ How to work in GroundWerk, for people and coding agents. A PR that changes a con
 - `build.cs`: the build script, which .NET 10 runs as a file-based app. Its Bullseye targets restore, build, test, pack and publish, so a pipeline's YAML only runs it (docs/adr/0005). Its `#:package` lines carry no versions, since those live in Directory.Packages.props.
 - `.devcontainer/`: the image that VS Code's dev container and the pipelines' container jobs run in, with every tool pinned and checked against its checksum, and the pre-commit hook that runs gitleaks (docs/adr/0007). A PR that moves Aspire.AppHost.Sdk in global.json moves ASPIRE_CLI_VERSION in its Dockerfile too.
 - `.vscode/launch.json`: F5 starts the AppHost through VS Code's Aspire extension, with the debugger attached to api and jobs.
+- `.claude/`: Claude Code's project skills, in `skills/`, and subagents, in `agents/`. The work-on-user-story skill and its subagent, story-coder, set the same model and effort in their frontmatter, so a PR that changes one changes both (docs/adr/0011).
 - `src/GroundWerk.Domain`: entities, value objects and the domain's rules, including the field enums that the database's overridable-field registry mirrors.
 - `src/GroundWerk.Application`: the handlers that the API and the jobs both call, validation and the unit of work.
 - `src/GroundWerk.Infrastructure`: the EF Core DbContext and its mappings, the interceptors and the outbox writer.
@@ -60,6 +61,7 @@ Project references point inward: Host references Infrastructure, Infrastructure 
 
 ## Branches, commits and PRs
 
+- In Claude Code, take a user story or bug to a PR with `/work-on-user-story <ID>`, which follows these rules and codes through story-coder.
 - Branch from main as `story/<ID>-<short-name>` or `bug/<ID>-<short-name>`, with the work item's ID. main refuses direct pushes.
 - End each commit message on the branch with `#<ID>`.
 - Title the PR `<Type> <ID>: <what it does>`, in sentence case, with no `#ID` and no period, such as `Bug 49: Remove groundwerk-azdo's ownership of itself`, and link it to its work item.
