@@ -67,15 +67,15 @@ resource "azuredevops_branch_policy_merge_types" "main" {
   }
 }
 
-# GroundWerk's PR build: pipeline groundwerk-ci has to pass on the PR's merge for any change
+# GroundWerk's PR build: pipeline build-groundwerk has to pass on the PR's merge for any change
 # outside docs and Markdown files (CICD-10, GATE-1, GATE-6, docs/adr/0008)
-resource "azuredevops_branch_policy_build_validation" "groundwerk_ci" {
+resource "azuredevops_branch_policy_build_validation" "build_groundwerk" {
   project_id = data.azuredevops_project.groundwerk.id
   blocking   = true
 
   settings {
-    display_name        = "groundwerk-ci"
-    build_definition_id = azuredevops_build_definition.groundwerk_ci.id
+    display_name        = "build-groundwerk"
+    build_definition_id = azuredevops_build_definition.build_groundwerk.id
     filename_patterns   = ["/*", "!/docs/*", "!*.md"]
 
     scope {

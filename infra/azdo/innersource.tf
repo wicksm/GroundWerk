@@ -41,7 +41,7 @@ resource "azuredevops_build_definition" "innersource_ci" {
 }
 
 # Lets pipeline innersource-ci use the SonarQube Cloud connection, registry-pull and the templates
-# repo, as groundwerk-ci does, so its first run doesn't wait for someone to permit them
+# repo, as build-groundwerk does, so its first run doesn't wait for someone to permit them
 resource "azuredevops_pipeline_authorization" "innersource_ci_sonarqube" {
   project_id  = data.azuredevops_project.groundwerk.id
   type        = "endpoint"

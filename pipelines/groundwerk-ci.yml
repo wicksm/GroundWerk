@@ -1,4 +1,4 @@
-# Pipeline groundwerk-ci: GroundWerk's ci stage, from the template in
+# Pipeline build-groundwerk: GroundWerk's ci stage, from the template in
 # GroundWerk.PipelineTemplates at a release tag (CICD-1, CICD-3). It runs on each change to main,
 # and as main's PR build through the branch policy in infra/azdo/policies.tf, for any change
 # outside docs and Markdown files (CICD-10, docs/adr/0008).

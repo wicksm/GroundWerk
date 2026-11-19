@@ -13,7 +13,7 @@ Every service should set up telemetry, and later auth, the same way, from shared
 - A tag's build skips SonarQube Cloud's analysis, since main's build analyzed the same commit, and the Free plan would take the tag for a branch, which it doesn't analyze.
 - Pipelines sign in to the feed as the project's build service, GroundWerk Build Service, which has the feed's Feed Publisher role, through the template's NuGetAuthenticate step. The AI developer's pipeline restores before its agent starts and then empties that sign-in's token, so the agent still works only as groundwerk-ai-developer (docs/adr/0006).
 - In the dev container, a command that needs the feed hands the Azure Artifacts Credential Provider, a .NET tool in the image, a one-hour token from the Azure CLI's sign-in, through VSS_NUGET_ACCESSTOKEN and VSS_NUGET_URI_PREFIXES, for that command only. NuGet's audit reads vulnerability data only from nuget.org, so a restore needs the feed only for an InnerSource version the package cache lacks.
-- innersource-ci may use registry-pull and sonarqube-cloud, as groundwerk-ci does, so ADR 0008's exception to ADR 0006 covers both pipelines.
+- innersource-ci may use registry-pull and sonarqube-cloud, as build-groundwerk does, so ADR 0008's exception to ADR 0006 covers both pipelines.
 
 ## Alternatives considered
 
