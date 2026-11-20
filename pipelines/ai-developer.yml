@@ -17,12 +17,23 @@ parameters:
       - claude-sonnet-5-5
       - claude-opus-5-5
 
-pool: groundwerk-pool
+resources:
+  repositories:
+    # This environment's names, which infra/azdo/settings.tf writes (docs/adr/0012)
+    - repository: settings
+      type: git
+      name: Settings
+
+variables:
+  - template: variables.yml@settings
 
 jobs:
   - job: ai_developer
     displayName: Take the item to a PR
     timeoutInMinutes: 60
+    # Set on the job, since a pipeline's root pool can't hold a template expression
+    pool:
+      name: ${{ variables.pool }}
     steps:
       # The whole history and its tags, so the agent can read git log and the build's version
       # comes out right

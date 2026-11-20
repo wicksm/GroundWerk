@@ -2,7 +2,7 @@
   "name": "renovate-runner",
   "version": "1.0.0",
   "private": true,
-  "description": "Renovate at a pinned version, which pipeline run-renovate runs to open upgrade PRs in Accounting's repos (CICD-17)",
+  "description": "Renovate at a pinned version, which pipeline run-renovate runs to open upgrade PRs in the project's repos (CICD-17)",
   "engines": {
     "node": ">=24.11"
   },

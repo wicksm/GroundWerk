@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Context
 
-A new version of a shared package or template should reach every repo that uses it without anyone filing the work, and after an announced deadline no build should stay below a version its owners require (CICD-17). Accounting's repos pin InnerSource's packages by version in Directory.Packages.props, the ci template by release tag in each pipeline's repository resource (CICD-1), and each task by its major version. Renovate finds new versions and opens PRs, and on Azure DevOps it runs in a pipeline. Its docs run it as the pipeline's build service, but every pipeline in the project runs as that service, and from the ci template's NuGetAuthenticate step on, a PR build's own code can read its token (docs/adr/0009).
+A new version of a shared package or template should reach every repo that uses it without anyone filing the work, and after an announced deadline no build should stay below a version its owners require (CICD-17). The project's repos pin InnerSource's packages by version in Directory.Packages.props, the ci template by release tag in each pipeline's repository resource (CICD-1), and each task by its major version. Renovate finds new versions and opens PRs, and on Azure DevOps it runs in a pipeline. Its docs run it as the pipeline's build service, but every pipeline in the project runs as that service, and from the ci template's NuGetAuthenticate step on, a PR build's own code can read its token (docs/adr/0009).
 
 ## Decision
 

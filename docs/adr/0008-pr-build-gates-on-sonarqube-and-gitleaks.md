@@ -13,7 +13,7 @@ Every change to main should be checked the same way before it merges (CICD-1, CI
 - gitleaks scans each of a PR's commits, or the commit a build of main builds, before anything is built or sent to SonarQube Cloud, so a secret never leaves in an analysis. A finding fails the job.
 - build.cs runs inside SonarQube Cloud's analysis and writes Cobertura coverage for it. In a PR build the analysis waits for the quality gate, and a failed gate fails the job. A build of main only reports.
 - The registry has two service connections that sign in with workload identity federation, each as a managed identity of its own. registry-push can push, and only pipeline build-image may use it, only from main. registry-pull can only pull.
-- SonarQube Cloud's token belongs to sonarqube-ci, an Entra ID user that exists only for CI, with Execute Analysis on GroundWerk, and lasts 90 days. It sits in the sonarqube-cloud service connection, made by hand so the token never reaches Terraform's state.
+- SonarQube Cloud's token belongs to sonarqube-ci, an Entra ID user that exists only for CI, with Execute Analysis on the GroundWerk project, and lasts 90 days. It sits in the sonarqube-cloud service connection, made by hand so the token never reaches Terraform's state.
 - registry-pull and sonarqube-cloud have no Only main check, since PR builds need them. They are the one exception to ADR 0006, and only pipeline build-groundwerk may use them.
 
 ## Alternatives considered

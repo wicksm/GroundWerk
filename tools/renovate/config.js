@@ -1,17 +1,14 @@
-// Renovate's whole config (CICD-17). Pipeline run-renovate runs Renovate on a schedule, signed in
-// as groundwerk-renovate, and Renovate opens an upgrade PR in each of Accounting's repos when one
+// Renovate's config (CICD-17). Pipeline run-renovate runs Renovate on a schedule, signed in as
+// groundwerk-renovate, and Renovate opens an upgrade PR in each repo the pipeline names when one
 // of InnerSource's packages, a release tag of GroundWerk.PipelineTemplates or a pipeline task has
-// a new version (docs/adr/0010). The pipeline gives it the token in RENOVATE_TOKEN.
+// a new version (docs/adr/0010). The pipeline gives it the token in RENOVATE_TOKEN, and the repos
+// in RENOVATE_REPOSITORIES, from the private Settings repo (docs/adr/0012).
 module.exports = {
   platform: 'azure',
   endpoint: 'https://dev.azure.com/mikewicks-lab/',
-  repositories: [
-    'GroundWerk/GroundWerk',
-    'GroundWerk/GroundWerk.PipelineTemplates',
-    'GroundWerk/InnerSource',
-  ],
 
-  // This file is the whole config, so the repos need no renovate.json and get no onboarding PR
+  // With what the pipeline sets, this file is the whole config, so the repos need no renovate.json
+  // and get no onboarding PR
   onboarding: false,
   requireConfig: 'optional',
 

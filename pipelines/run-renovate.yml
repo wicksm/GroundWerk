@@ -1,4 +1,4 @@
-# Renovate (CICD-17): opens an upgrade PR in each of Accounting's repos when one of InnerSource's
+# Renovate (CICD-17): opens an upgrade PR in each repo that Settings lists when one of InnerSource's
 # packages, a release tag of GroundWerk.PipelineTemplates or a pipeline task has a new version,
 # as tools/renovate/config.js sets. It runs from main on a schedule, or when you run it. It signs
 # in as groundwerk-renovate through the renovate service connection, so it holds no secret. It
@@ -14,12 +14,23 @@ schedules:
         - main
     always: true
 
-pool: groundwerk-pool
+resources:
+  repositories:
+    # This environment's names, which infra/azdo/settings.tf writes (docs/adr/0012)
+    - repository: settings
+      type: git
+      name: Settings
+
+variables:
+  - template: variables.yml@settings
 
 jobs:
   - job: renovate
     displayName: Open upgrade PRs
     timeoutInMinutes: 30
+    # Set on the job, since a pipeline's root pool can't hold a template expression
+    pool:
+      name: ${{ variables.pool }}
     steps:
       - checkout: self
         fetchDepth: 1
@@ -50,5 +61,7 @@ jobs:
           workingDirectory: tools/renovate
         env:
           RENOVATE_CONFIG_FILE: config.js
+          # The repos to update, from Settings
+          RENOVATE_REPOSITORIES: $(renovateRepositories)
           # No install script ran, so RE2, the regex engine Renovate would rather use, isn't built
           RENOVATE_X_IGNORE_RE2: 'true'
