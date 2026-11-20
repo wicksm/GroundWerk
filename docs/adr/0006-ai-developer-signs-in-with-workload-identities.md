@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Context
 
-AI-5 has an AI developer take a user story or bug to a PR with no one watching. It's a Claude Agent SDK program in tools/ai-developer that pipeline ai-developer runs on groundwerk-pool. It runs code it writes, since the tests it adds run in dotnet test, so whatever the run can reach, that code can reach too. It has to sign in to Azure DevOps, where a service principal can't have a personal access token, and to the Claude API. It must not be able to push to main, run a pipeline or reach a secret.
+AI-5 has an AI developer take a user story or bug to a PR with no one watching. It's a Claude Agent SDK program in tools/ai-developer that pipeline ai-developer runs on the project's Managed DevOps Pool. It runs code it writes, since the tests it adds run in dotnet test, so whatever the run can reach, that code can reach too. It has to sign in to Azure DevOps, where a service principal can't have a personal access token, and to the Claude API. It must not be able to push to main, run a pipeline or reach a secret.
 
 ## Decision
 

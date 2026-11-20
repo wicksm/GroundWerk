@@ -9,7 +9,7 @@ Every change to main should be checked the same way before it merges (CICD-1, CI
 ## Decision
 
 - GroundWerk.PipelineTemplates holds the ci stage, stages/ci.yml, and pipelines extend it at a release tag, so a template change reaches a pipeline only through a PR that moves the tag. Pipeline build-groundwerk extends it, runs on each change to main, and is main's PR build for any change outside docs and Markdown files.
-- The stage is one container job on a Microsoft-hosted agent, in the dev container's image. Pipeline build-image builds that image on each change to it on main and pushes it to crgroundwerk, an Azure Container Registry on the Basic tier, and pipelines pin it by digest, so a new image reaches them only through a PR.
+- The stage is one container job on a Microsoft-hosted agent, in the dev container's image. Pipeline build-image builds that image on each change to it on main and pushes it as build-image to an Azure Container Registry on the Basic tier, and pipelines pin it by digest, so a new image reaches them only through a PR.
 - gitleaks scans each of a PR's commits, or the commit a build of main builds, before anything is built or sent to SonarQube Cloud, so a secret never leaves in an analysis. A finding fails the job.
 - build.cs runs inside SonarQube Cloud's analysis and writes Cobertura coverage for it. In a PR build the analysis waits for the quality gate, and a failed gate fails the job. A build of main only reports.
 - The registry has two service connections that sign in with workload identity federation, each as a managed identity of its own. registry-push can push, and only pipeline build-image may use it, only from main. registry-pull can only pull.

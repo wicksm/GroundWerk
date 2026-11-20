@@ -52,6 +52,10 @@ stages:
               SYSTEM_OIDCREQUESTURI: $(System.OidcRequestUri)
               AZDO_ORG_SERVICE_URL: https://dev.azure.com/mikewicks-lab
               TF_TOKEN_app_terraform_io: $(TF_TOKEN_app_terraform_io)
+              # Terraform's inputs (infra/azdo/variables.tf), from group azdo. The apply takes them
+              # from the saved plan.
+              TF_VAR_workload: $(workload)
+              TF_VAR_sonar_project_key: $(sonarProjectKey)
 
           - publish: $(System.DefaultWorkingDirectory)/infra/azdo/tfplan
             artifact: tfplan

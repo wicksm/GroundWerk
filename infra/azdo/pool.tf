@@ -15,19 +15,19 @@ resource "azuredevops_group_membership" "azdo_reader" {
 }
 
 resource "azurerm_resource_group" "pool" {
-  name     = "rg-groundwerk-pool"
+  name     = "rg-${var.workload}-pool"
   location = "eastus"
 }
 
 # A Managed DevOps Pool belongs to a Dev Center project. Neither costs anything on its own.
 resource "azurerm_dev_center" "pool" {
-  name                = "dc-groundwerk"
+  name                = "dc-${var.workload}"
   resource_group_name = azurerm_resource_group.pool.name
   location            = azurerm_resource_group.pool.location
 }
 
 resource "azurerm_dev_center_project" "pool" {
-  name                = "dcp-groundwerk"
+  name                = "dcp-${var.workload}"
   dev_center_id       = azurerm_dev_center.pool.id
   resource_group_name = azurerm_resource_group.pool.name
   location            = azurerm_resource_group.pool.location
@@ -35,7 +35,7 @@ resource "azurerm_dev_center_project" "pool" {
 
 # One agent at a time, made for each job and removed after it, with none kept on standby
 resource "azurerm_managed_devops_pool" "pool" {
-  name                  = "groundwerk-pool"
+  name                  = "${var.workload}-pool"
   resource_group_name   = azurerm_resource_group.pool.name
   location              = azurerm_resource_group.pool.location
   dev_center_project_id = azurerm_dev_center_project.pool.id

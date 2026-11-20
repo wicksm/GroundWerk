@@ -3,7 +3,7 @@
 # Pipeline build-image pushes the image, and pipelines pull it by its digest (docs/adr/0008).
 
 resource "azurerm_resource_group" "registry" {
-  name     = "rg-groundwerk-registry"
+  name     = "rg-${var.workload}-registry"
   location = "eastus"
 }
 
@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "registry" {
 # network access stays on, since private endpoints and network rules need Premium, and the registry
 # has no identity of its own, since it runs no tasks and customer-managed keys need Premium too.
 resource "azurerm_container_registry" "registry" {
-  name                = "crgroundwerk"
+  name                = "cr${var.workload}"
   resource_group_name = azurerm_resource_group.registry.name
   location            = azurerm_resource_group.registry.location
   sku                 = "Basic"
@@ -23,7 +23,7 @@ resource "azurerm_container_registry" "registry" {
 
 # registry-pull may only pull. PR builds use it, so it has no Only main check (docs/adr/0008).
 resource "azurerm_user_assigned_identity" "registry_pull" {
-  name                = "id-groundwerk-registry-pull"
+  name                = "id-${var.workload}-registry-pull"
   resource_group_name = azurerm_resource_group.registry.name
   location            = azurerm_resource_group.registry.location
 }
@@ -38,7 +38,7 @@ resource "azurerm_role_assignment" "registry_pull" {
 resource "azuredevops_serviceendpoint_azurecr" "registry_pull" {
   project_id                             = data.azuredevops_project.groundwerk.id
   service_endpoint_name                  = "registry-pull"
-  description                            = "Pulls images from crgroundwerk"
+  description                            = "Pulls images from ${azurerm_container_registry.registry.name}"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   resource_group                         = azurerm_resource_group.registry.name
   azurecr_name                           = azurerm_container_registry.registry.name
@@ -61,7 +61,7 @@ resource "azurerm_federated_identity_credential" "registry_pull" {
 
 # registry-push may pull and push. Only pipeline build-image may use it, and only from main.
 resource "azurerm_user_assigned_identity" "registry_push" {
-  name                = "id-groundwerk-registry-push"
+  name                = "id-${var.workload}-registry-push"
   resource_group_name = azurerm_resource_group.registry.name
   location            = azurerm_resource_group.registry.location
 }
@@ -76,7 +76,7 @@ resource "azurerm_role_assignment" "registry_push" {
 resource "azuredevops_serviceendpoint_azurecr" "registry_push" {
   project_id                             = data.azuredevops_project.groundwerk.id
   service_endpoint_name                  = "registry-push"
-  description                            = "Pushes images to crgroundwerk"
+  description                            = "Pushes images to ${azurerm_container_registry.registry.name}"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
   resource_group                         = azurerm_resource_group.registry.name
   azurecr_name                           = azurerm_container_registry.registry.name

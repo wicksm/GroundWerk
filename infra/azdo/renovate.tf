@@ -1,4 +1,4 @@
-# Renovate (CICD-17), which opens upgrade PRs in Accounting's three repos as groundwerk-renovate,
+# Renovate (CICD-17), which opens upgrade PRs in the project's repos as groundwerk-renovate,
 # whose identity and seat are in identities.tf and azdo-access.tf. It can create branches and open
 # PRs, and it can't push to main or to anyone else's branch, complete a PR or reach a secret
 # (docs/adr/0010).

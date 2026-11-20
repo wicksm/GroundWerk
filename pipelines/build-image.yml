@@ -1,6 +1,8 @@
-# Pipeline build-image builds the dev container's image from .devcontainer and pushes it to
-# crgroundwerk, tagged with its commit, on each change to the image on main (docs/adr/0008).
-# Pipelines pull the image by the digest this prints, and move to a new one through a PR.
+# Pipeline build-image builds the dev container's image from .devcontainer and pushes it to the
+# registry as build-image, tagged with its commit, on each change to the image on main
+# (docs/adr/0008). Pipelines pull the image by the digest this prints, and move to a new one
+# through a PR. Its connection, registry-push, knows the registry, so this file doesn't name it
+# (docs/adr/0012).
 trigger:
   branches:
     include:
@@ -15,16 +17,21 @@ pool:
   vmImage: ubuntu-24.04
 
 steps:
+  # Without labels for the pipeline's or the base image's details, like the image before it
   - task: Docker@2
-    displayName: Sign in to crgroundwerk
+    displayName: Build and push the image
     inputs:
-      command: login
+      command: buildAndPush
       containerRegistry: registry-push
+      repository: build-image
+      Dockerfile: .devcontainer/Dockerfile
+      tags: $(Build.SourceVersion)
+      addPipelineData: false
+      addBaseImageData: false
 
   - bash: |
       set -euo pipefail
-      image="crgroundwerk.azurecr.io/groundwerk-dev:$BUILD_SOURCEVERSION"
-      docker build --tag "$image" .devcontainer
-      docker push "$image"
+      image="$(docker image ls --format '{{.Repository}}:{{.Tag}}' \
+        --filter "reference=*/build-image:$BUILD_SOURCEVERSION")"
       echo "Digest: $(docker image inspect --format '{{index .RepoDigests 0}}' "$image")"
-    displayName: Build and push the image
+    displayName: Print the image's digest
