@@ -12,6 +12,7 @@ The repos go public through a mirror (GATE-12), so they shouldn't name this envi
 - A pipeline that needs a name lists Settings as a repository resource, adds its template to its variables, and reads the name with a template expression, such as `${{ variables.registry }}`. Each such pipeline has an authorization for Settings in settings.tf, since the project protects access to repos from YAML pipelines.
 - Terraform builds the Azure resources' names from its workload input, as in rg-<workload>-registry. Pipeline azdo-terraform passes it and the SonarQube key from variable group azdo, which only that pipeline may use, and only from main.
 - Contributors can read Settings but can't push to it, so its names change only through Terraform, whose next apply puts back any other change.
+- Settings' main has the other repos' one-reviewer policy, since an Only main check verifies that every repo a run reads has a branch policy. The group Settings Writers, whose one member is Terraform's identity, may push past it to write variables.yml.
 - Pipeline build-image pushes with Docker@2, whose registry-push connection knows the registry, so its YAML names none.
 
 ## Alternatives considered

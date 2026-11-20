@@ -26,7 +26,8 @@ resource "azuredevops_git_repository_file" "settings" {
   file           = "variables.yml"
   commit_message = "Write the settings from infra/azdo"
   content        = <<-EOT
-    # Written by infra/azdo/settings.tf, whose next apply puts back any other change
+    # Written by infra/azdo/settings.tf, whose next apply puts back any other change. main has a
+    # branch policy, which Terraform's identity may push past.
     variables:
       # The container registry's login server, from infra/azdo/registry.tf
       - name: registry
@@ -41,6 +42,13 @@ resource "azuredevops_git_repository_file" "settings" {
       - name: renovateRepositories
         value: '${jsonencode(local.renovate_repositories)}'
   EOT
+
+  # After main's policy and the permission to push past it, so that every apply can write the file
+  depends_on = [
+    azuredevops_branch_policy_min_reviewers.settings,
+    azuredevops_group_membership.settings_writers,
+    azuredevops_git_permissions.settings_writers,
+  ]
 }
 
 # Contributors can read it but can't push to it, so its names change only through Terraform
@@ -56,6 +64,48 @@ resource "azuredevops_git_permissions" "settings" {
   permissions = {
     CreateBranch      = "Deny"
     GenericContribute = "Deny"
+  }
+}
+
+# An Only main check verifies that every repo a run reads has a branch policy, so Settings' main
+# gets the other repos' reviewer policy (docs/adr/0012)
+resource "azuredevops_branch_policy_min_reviewers" "settings" {
+  project_id = azuredevops_git_repository.settings.project_id
+  blocking   = true
+
+  settings {
+    reviewer_count             = 1
+    submitter_can_vote         = false
+    last_pusher_cannot_approve = true
+
+    scope {
+      repository_id  = azuredevops_git_repository.settings.id
+      repository_ref = "refs/heads/main"
+      match_type     = "Exact"
+    }
+  }
+}
+
+# Terraform writes variables.yml straight to main, so its identity, this group's one member, may
+# push past the policy
+resource "azuredevops_group" "settings_writers" {
+  scope        = azuredevops_git_repository.settings.project_id
+  display_name = "Settings Writers"
+  description  = "Terraform's identity, which writes Settings' variables.yml past its main's policy"
+}
+
+resource "azuredevops_group_membership" "settings_writers" {
+  group   = azuredevops_group.settings_writers.descriptor
+  members = [azuredevops_service_principal_entitlement.azdo.descriptor]
+  mode    = "overwrite" # Terraform made this group, so its members are exactly these
+}
+
+resource "azuredevops_git_permissions" "settings_writers" {
+  project_id    = azuredevops_git_repository.settings.project_id
+  repository_id = azuredevops_git_repository.settings.id
+  principal     = azuredevops_group.settings_writers.descriptor
+  permissions = {
+    PolicyExempt = "Allow" # Bypass policies when pushing
   }
 }
 
