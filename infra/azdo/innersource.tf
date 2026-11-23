@@ -11,9 +11,11 @@ resource "azuredevops_feed" "innersource" {
 }
 
 # The identity every pipeline in this project runs as, since each job's token is limited to the
-# project
+# project. It's found by its account name, which is the project's ID, so renaming the project
+# doesn't change it
 data "azuredevops_identity_user" "build_service" {
-  name = "GroundWerk Build Service (mikewicks-lab)"
+  name          = data.azuredevops_project.groundwerk.id
+  search_filter = "AccountName"
 }
 
 # Feed Publisher, so innersource-ci can push the packages and every pipeline can restore them

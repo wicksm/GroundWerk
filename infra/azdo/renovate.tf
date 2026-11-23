@@ -18,7 +18,7 @@ resource "azuredevops_group_membership" "renovate" {
 }
 
 resource "azuredevops_group_membership" "renovate_read" {
-  group   = data.azuredevops_group.groundwerk_readers.descriptor
+  group   = data.azuredevops_group.readers.descriptor
   members = [azuredevops_group.renovate.descriptor]
   mode    = "add"
 }

@@ -38,7 +38,7 @@ resource "azuredevops_group_membership" "ai_developers" {
 }
 
 resource "azuredevops_group_membership" "ai_developers_read" {
-  group   = data.azuredevops_group.groundwerk_readers.descriptor
+  group   = data.azuredevops_group.readers.descriptor
   members = [azuredevops_group.ai_developers.descriptor]
   mode    = "add"
 }

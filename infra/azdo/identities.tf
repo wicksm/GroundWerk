@@ -1,4 +1,4 @@
-# The identities the pipelines and the AI developer sign in as (IAC-12). an admin created the
+# The identities the pipelines and the AI developer sign in as (IAC-12). An admin created the
 # first ones by hand, and pipeline azdo-terraform manages them all and creates the rest. The
 # deploy pipelines' identities come in phase 3, when something first deploys.
 

@@ -25,7 +25,7 @@ AI-5 has an AI developer take a user story or bug to a PR with no one watching. 
 
 - Code the agent runs can read both of its tokens. Each lasts about an hour, and the Claude one can spend only what the workspace's limit allows.
 - It can still approve other people's PRs, since Contribute to pull requests includes voting, and its approval counts toward main's one-reviewer policy. Making azure-reviewer a required reviewer on main would close this.
-- Edit work items is set per area path, and GroundWerk has one area, so it can edit any work item.
+- Edit work items is set per area path, and the AI developer's group has it on the project's root area, so it can edit any work item.
 - The connection's sign-in can't get new tokens once its 10-minute assertion expires, so the program gets both tokens first. They outlast the step's 45-minute timeout, and a longer run would need the task's keepAzSessionActive option.
 - The pool's agents start empty, so each run downloads Claude Code, about 330 MB.
 - @azure-devops/mcp 2.11.0 brings packages with high-severity advisories in code it doesn't use here, its interactive sign-in and its HTTP server. The pipeline installs with install scripts off.

@@ -3,13 +3,13 @@
 # bills its VM only while a job runs (CICD-15). It joins the private network in phase 3.
 
 # Microsoft requires whoever creates a pool to be a member of each project it serves
-data "azuredevops_group" "groundwerk_readers" {
+data "azuredevops_group" "readers" {
   project_id = data.azuredevops_project.groundwerk.id
   name       = "Readers"
 }
 
 resource "azuredevops_group_membership" "azdo_reader" {
-  group   = data.azuredevops_group.groundwerk_readers.descriptor
+  group   = data.azuredevops_group.readers.descriptor
   members = [azuredevops_service_principal_entitlement.azdo.descriptor]
   mode    = "add"
 }
@@ -44,7 +44,7 @@ resource "azurerm_managed_devops_pool" "pool" {
   azure_devops_organization {
     organization {
       url         = "https://dev.azure.com/mikewicks-lab"
-      projects    = ["GroundWerk"]
+      projects    = [data.azuredevops_project.groundwerk.name]
       parallelism = 1
     }
 
@@ -81,7 +81,7 @@ resource "azurerm_managed_devops_pool" "pool" {
   }
 }
 
-# The pool's queue in GroundWerk, which Azure DevOps gets when the pool is created. A pipeline
+# The pool's queue in the project, which Azure DevOps gets when the pool is created. A pipeline
 # that runs on the pool needs an azuredevops_pipeline_authorization for it, added in this file.
 data "azuredevops_agent_queue" "pool" {
   project_id = data.azuredevops_project.groundwerk.id
