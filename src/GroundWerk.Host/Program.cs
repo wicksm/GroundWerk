@@ -1,5 +1,5 @@
-using InnerSource.Telemetry;
 using GroundWerk.Host;
+using GroundWerk.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 var role = HostRoleParser.Parse(builder.Configuration["Role"]);

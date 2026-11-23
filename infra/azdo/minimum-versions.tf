@@ -2,10 +2,10 @@
 # in GroundWerk.PipelineTemplates reads variable group minimum-versions in every build: a build
 # that uses a package below its minimum warns until the deadline, and fails from that day on, in
 # UTC. To announce a minimum, add an entry here through a PR, such as
-# { package = "InnerSource.Telemetry", minimum = "1.1.0", deadline = "2027-01-15" }.
+# { package = "GroundWerk.Telemetry", minimum = "2.1.0", deadline = "2027-01-15" }.
 locals {
   minimum_versions = [
-    { package = "InnerSource.Telemetry", minimum = "1.0.1", deadline = "2026-11-17" },
+    { package = "GroundWerk.Telemetry", minimum = "2.0.0", deadline = "2026-11-17" },
   ]
 }
 

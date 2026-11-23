@@ -1,6 +1,6 @@
 // Renovate's config (CICD-17). Pipeline run-renovate runs Renovate on a schedule, signed in as
 // groundwerk-renovate, and Renovate opens an upgrade PR in each repo the pipeline names when one
-// of InnerSource's packages, a release tag of GroundWerk.PipelineTemplates or a pipeline task has
+// of the shared packages, a release tag of the ci template or a pipeline task has
 // a new version (docs/adr/0010). The pipeline gives it the token in RENOVATE_TOKEN, and the repos
 // in RENOVATE_REPOSITORIES, from the private Settings repo (docs/adr/0012).
 module.exports = {
@@ -39,10 +39,10 @@ module.exports = {
   ],
 
   packageRules: [
-    // Only InnerSource's packages, the shared ones that CICD-17 automates
+    // Only GroundWerk.InnerSource's packages, the shared ones that CICD-17 automates
     {
       matchManagers: ['nuget'],
-      matchPackageNames: ['!InnerSource.*'],
+      matchPackageNames: ['!GroundWerk.*'],
       enabled: false,
     },
     // The custom manager bumps every task, so the Azure Pipelines manager leaves them alone

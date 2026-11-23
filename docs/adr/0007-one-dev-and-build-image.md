@@ -24,7 +24,7 @@ A build on a dev machine should use the same tools, at the same versions, as the
 - Tools installed on each dev machine, which no pipeline shares and which drift apart.
 - One copy of the Aspire CLI for every user, which hung for every user but its owner, since the CLI unpacks its dashboard and orchestrator beside itself and takes a lock there.
 - A script that each clone runs to install the hook, which a clone can skip, or the pre-commit framework, which needs Python and a config file in each repo.
-- InnerSource and PipelineTemplates in this image now, which needs the image in a registry they can pull it from, or a copy of the Dockerfile in each repo, which would drift.
+- GroundWerk.InnerSource and GroundWerk.PipelineTemplates in this image now, which needs the image in a registry they can pull it from, or a copy of the Dockerfile in each repo, which would drift.
 
 ## Consequences
 
