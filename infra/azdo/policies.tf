@@ -1,5 +1,5 @@
 # main's branch policy on every repo, the SOC 2 evidence (SDLC-5).
-# The PR builds of GroundWerk and InnerSource join it at the end of this file.
+# The PR builds of GroundWerk and GroundWerk.InnerSource join it at the end of this file.
 
 resource "azuredevops_branch_policy_min_reviewers" "main" {
   for_each   = azuredevops_git_repository.repo
@@ -86,8 +86,8 @@ resource "azuredevops_branch_policy_build_validation" "build_groundwerk" {
   }
 }
 
-# InnerSource's PR build: pipeline innersource-ci has to pass on the PR's merge for any change
-# outside Markdown files (CICD-10, CICD-13, GATE-1, GATE-6, docs/adr/0009)
+# GroundWerk.InnerSource's PR build: pipeline innersource-ci has to pass on the PR's merge for any
+# change outside Markdown files (CICD-10, CICD-13, GATE-1, GATE-6, docs/adr/0009)
 resource "azuredevops_branch_policy_build_validation" "innersource_ci" {
   project_id = data.azuredevops_project.groundwerk.id
   blocking   = true
@@ -98,7 +98,7 @@ resource "azuredevops_branch_policy_build_validation" "innersource_ci" {
     filename_patterns   = ["/*", "!*.md"]
 
     scope {
-      repository_id  = azuredevops_git_repository.repo["InnerSource"].id
+      repository_id  = azuredevops_git_repository.repo["GroundWerk.InnerSource"].id
       repository_ref = "refs/heads/main"
       match_type     = "Exact"
     }

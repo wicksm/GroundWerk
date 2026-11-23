@@ -3,17 +3,11 @@ data "azuredevops_project" "groundwerk" {
 }
 
 locals {
-  # Made by hand before this root existed: the one hand-made exception (IAC-12)
-  hand_made_repos = toset(["GroundWerk", "GroundWerk.PipelineTemplates", "InnerSource"])
-
-  # Every repo this root manages; later repos are added here, and Terraform creates them
-  repos = local.hand_made_repos
-}
-
-import {
-  for_each = local.hand_made_repos
-  to       = azuredevops_git_repository.repo[each.key]
-  id       = "GroundWerk/${each.key}"
+  # The code repos by name, each with main's branch policies and Renovate's permissions. Terraform
+  # creates a repo added here. The first three were made by hand before this root existed, the one
+  # hand-made exception (IAC-12), and imported. A repo's name is its key, so renaming one needs
+  # moved blocks.
+  repos = toset(["GroundWerk", "GroundWerk.PipelineTemplates", "GroundWerk.InnerSource"])
 }
 
 resource "azuredevops_git_repository" "repo" {

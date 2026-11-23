@@ -49,7 +49,7 @@ resource "azuredevops_git_permissions" "renovate_main" {
   }
 }
 
-# It reads the innersource feed to find InnerSource's new versions
+# It reads the innersource feed to find GroundWerk.InnerSource's new versions
 resource "azuredevops_feed_permission" "innersource_renovate" {
   feed_id             = azuredevops_feed.innersource.id
   project_id          = data.azuredevops_project.groundwerk.id

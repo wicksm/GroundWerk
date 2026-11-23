@@ -1,10 +1,10 @@
-# InnerSource's packages (CODE-3, CODE-11): feed innersource holds them, and pipeline
-# innersource-ci builds the InnerSource repo from the ci template in GroundWerk.PipelineTemplates.
-# Each PR build pushes its packages as prereleases, and each version tag's build pushes that
-# version (CICD-13, docs/adr/0009).
+# GroundWerk.InnerSource's packages (CODE-3, CODE-11): feed innersource holds them, and pipeline
+# innersource-ci builds that repo from the ci template in GroundWerk.PipelineTemplates. Each PR
+# build pushes its packages as prereleases, and each version tag's build pushes that version
+# (CICD-13, docs/adr/0009).
 
-# No upstream sources, so the feed holds only InnerSource's own packages, and every other package
-# comes straight from nuget.org through each repo's nuget.config
+# No upstream sources, so the feed holds only GroundWerk.InnerSource's own packages, and every
+# other package comes straight from nuget.org through each repo's nuget.config
 resource "azuredevops_feed" "innersource" {
   name       = "innersource"
   project_id = data.azuredevops_project.groundwerk.id
@@ -30,7 +30,7 @@ resource "azuredevops_build_definition" "innersource_ci" {
 
   repository {
     repo_type   = "TfsGit"
-    repo_id     = azuredevops_git_repository.repo["InnerSource"].id
+    repo_id     = azuredevops_git_repository.repo["GroundWerk.InnerSource"].id
     branch_name = "refs/heads/main"
     yml_path    = "pipelines/innersource-ci.yml"
   }
