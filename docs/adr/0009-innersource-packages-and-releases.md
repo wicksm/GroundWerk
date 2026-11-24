@@ -1,6 +1,6 @@
 # 9. GroundWerk.InnerSource's packages go to their own feed and release by tag
 
-Status: Accepted
+Status: Accepted, amended by ADR 0014, which also publishes each release to nuget.org, restores the packages from there and signs in to the feed only to push
 
 ## Context
 
