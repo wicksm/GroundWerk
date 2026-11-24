@@ -1,0 +1,108 @@
+# Pipeline mirror-to-github (GATE-6, GATE-12): copies main and the tags of each of the project's
+# repos but Settings to its copy on GitHub, every day and whenever you run it, both from main. For
+# each repo, tools/github-mirror/mirror.sh makes the renames in PRIVATE_RENAMES in its whole
+# history, rewrites every address to the GitHub account's no-reply address, stops if one of
+# PRIVATE_WORDS or a secret is in what it would push, and pushes with that GitHub repo's deploy key,
+# a secure file that only main may use. GITHUB_OWNER, GITHUB_NOREPLY, PRIVATE_WORDS and
+# PRIVATE_RENAMES are the pipeline's own variables, set by hand in Azure DevOps, so no repo names
+# the account, the words or the renames (docs/adr/0013).
+
+trigger: none
+
+schedules:
+  - cron: '0 6 * * *'
+    displayName: Daily at 06:00 UTC
+    branches:
+      include:
+        - main
+    always: true
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: GroundWerk.PipelineTemplates
+      ref: refs/heads/main
+    - repository: innersource
+      type: git
+      name: GroundWerk.InnerSource
+      ref: refs/heads/main
+    # This environment's names, which infra/azdo/settings.tf writes (docs/adr/0012)
+    - repository: settings
+      type: git
+      name: Settings
+
+variables:
+  - template: variables.yml@settings
+  # gitleaks at the dev container image's version, checked against its release's checksum
+  - name: gitleaksVersion
+    value: 8.30.1
+  - name: gitleaksSha256
+    value: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+
+jobs:
+  - job: mirror
+    displayName: Mirror main and tags to GitHub
+    timeoutInMinutes: 30
+    # Set on the job, since a pipeline's root pool can't hold a template expression
+    pool:
+      name: ${{ variables.pool }}
+    steps:
+      # The whole history and the tags of each repo, each in a folder of $(Build.SourcesDirectory)
+      # named after the repo, which mirror.sh takes as its GitHub repo's name
+      - checkout: self
+        fetchDepth: 0
+        fetchTags: true
+      - checkout: templates
+        fetchDepth: 0
+        fetchTags: true
+      - checkout: innersource
+        fetchDepth: 0
+        fetchTags: true
+
+      - task: UsePythonVersion@0
+        displayName: Use Python 3.12
+        inputs:
+          versionSpec: '3.12'
+
+      # git filter-repo comes from requirements.txt, which pins it by its hash
+      - script: |
+          set -euo pipefail
+          tools="$(Agent.TempDirectory)/mirror-tools"
+          mkdir -p "$tools/bin"
+          curl --proto '=https' -fsSLo "$tools/gitleaks.tar.gz" "https://github.com/gitleaks/gitleaks/releases/download/v$(gitleaksVersion)/gitleaks_$(gitleaksVersion)_linux_x64.tar.gz"
+          echo "$(gitleaksSha256)  $tools/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf "$tools/gitleaks.tar.gz" -C "$tools/bin" --no-same-owner gitleaks
+          python3 -m venv "$tools/venv"
+          "$tools/venv/bin/pip" install --quiet --disable-pip-version-check --require-hashes -r GroundWerk/tools/github-mirror/requirements.txt
+          ln -s "$tools/venv/bin/git-filter-repo" "$tools/bin/git-filter-repo"
+          echo "##vso[task.prependpath]$tools/bin"
+        displayName: Install gitleaks and git filter-repo
+        workingDirectory: $(Build.SourcesDirectory)
+
+      # Each GitHub repo's deploy key, which only main may use and which is deleted when the job ends
+      - task: DownloadSecureFile@1
+        name: groundwerkKey
+        displayName: Download GroundWerk's deploy key
+        inputs:
+          secureFile: github-mirror-GroundWerk
+      - task: DownloadSecureFile@1
+        name: templatesKey
+        displayName: Download GroundWerk.PipelineTemplates's deploy key
+        inputs:
+          secureFile: github-mirror-GroundWerk.PipelineTemplates
+      - task: DownloadSecureFile@1
+        name: innersourceKey
+        displayName: Download GroundWerk.InnerSource's deploy key
+        inputs:
+          secureFile: github-mirror-GroundWerk.InnerSource
+
+      - script: GroundWerk/tools/github-mirror/mirror.sh GroundWerk "$(groundwerkKey.secureFilePath)"
+        displayName: Mirror GroundWerk
+        workingDirectory: $(Build.SourcesDirectory)
+      - script: GroundWerk/tools/github-mirror/mirror.sh GroundWerk.PipelineTemplates "$(templatesKey.secureFilePath)"
+        displayName: Mirror GroundWerk.PipelineTemplates
+        workingDirectory: $(Build.SourcesDirectory)
+      - script: GroundWerk/tools/github-mirror/mirror.sh GroundWerk.InnerSource "$(innersourceKey.secureFilePath)"
+        displayName: Mirror GroundWerk.InnerSource
+        workingDirectory: $(Build.SourcesDirectory)

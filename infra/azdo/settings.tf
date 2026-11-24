@@ -115,6 +115,7 @@ resource "azuredevops_pipeline_authorization" "settings" {
   for_each = {
     ai_developer     = azuredevops_build_definition.ai_developer.id
     build_groundwerk = azuredevops_build_definition.build_groundwerk.id
+    github_mirror    = azuredevops_build_definition.github_mirror.id
     innersource_ci   = azuredevops_build_definition.innersource_ci.id
     renovate         = azuredevops_build_definition.renovate.id
   }

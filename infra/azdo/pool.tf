@@ -106,3 +106,11 @@ resource "azuredevops_pipeline_authorization" "renovate_pool" {
   resource_id = data.azuredevops_agent_queue.pool.id
   pipeline_id = azuredevops_build_definition.renovate.id
 }
+
+# Pipeline mirror-to-github runs on the pool (docs/adr/0013)
+resource "azuredevops_pipeline_authorization" "github_mirror_pool" {
+  project_id  = data.azuredevops_project.groundwerk.id
+  type        = "queue"
+  resource_id = data.azuredevops_agent_queue.pool.id
+  pipeline_id = azuredevops_build_definition.github_mirror.id
+}
