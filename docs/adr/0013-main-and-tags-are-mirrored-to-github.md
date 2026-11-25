@@ -8,6 +8,16 @@ The project's repos are mirrored to repos on GitHub, so the work shows in a port
 
 ## Decision
 
+```mermaid
+flowchart LR
+    azdo["Azure DevOps:<br>main and the tags<br>of the 3 repos"] -->|"daily at 06:00 UTC<br>or by hand"| copy["mirror.sh copies<br>main and the tags<br>into a bare repo"]
+    copy --> rewrite["git filter-repo<br>renames the old names<br>and rewrites addresses"]
+    rewrite --> checks["Checks: main's files<br>unchanged, no other<br>address, no private word,<br>gitleaks finds no secret"]
+    checks -->|"any fails"| stop["Pushes nothing"]
+    checks -->|"all pass: push without<br>force, with the<br>repo's deploy key"| github["GitHub's copy,<br>read-only, with<br>secret scanning and<br>push protection"]
+    github --> verify["Checks GitHub holds<br>exactly main<br>and the tags"]
+```
+
 - Pipeline mirror-to-github runs on the pool every day at 06:00 UTC and whenever a person runs it, both from main, with no CI trigger. It checks out the whole history and the tags of GroundWerk, GroundWerk.PipelineTemplates and GroundWerk.InnerSource, and tools/github-mirror/mirror.sh mirrors each to the GitHub repo of the same name, under the account in the pipeline's variable GITHUB_OWNER.
 - For each repo, mirror.sh copies only main and the tags into a new bare repo, where git filter-repo 2.47.0 rewrites the whole history. It makes each rename of the form old=new in the pipeline's variable PRIVATE_RENAMES, such as each form of the old name with the new name's, in every text file, path, commit and tag message, and author, committer and tagger name, and rewrites every author, committer and tagger address to the no-reply address in GITHUB_NOREPLY. A rename whose old text starts word: changes it only as a whole word, such as a sign-in name that a longer word holds too. Binary files keep their bytes. Every commit stays, even one that made only renames and so changes nothing now. The repos in Azure DevOps keep their history as it is.
 - The renames change only the past: mirror.sh pushes nothing if they would change main's files as they are today. It also pushes nothing if any other address is left, if a name holds an address, if one of the words in PRIVATE_WORDS is in a path, a file, a commit or a tag that it would push, in any case, or, for one that starts word:, as a whole word in its own case, or if gitleaks 8.30.1 finds a secret in those commits or tags, whose default rules skip some files that rarely hold one, such as lock files and images. The rewrite gives the same commits on every run, so it pushes without force, and after the push it checks that the GitHub repo holds exactly main and those tags.

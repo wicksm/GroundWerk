@@ -8,6 +8,17 @@ AI-5 has an AI developer take a user story or bug to a PR with no one watching. 
 
 ## Decision
 
+```mermaid
+flowchart LR
+    person["A person tags<br>the item ai-developer<br>and runs the pipeline"] --> step["Pipeline ai-developer<br>on main, through service<br>connection ai-developer"]
+    step -->|"workload identity<br>federation"| entra["Entra ID signs in<br>groundwerk-ai-developer"]
+    entra -->|"two tokens,<br>about an hour each"| agent["The agent in<br>tools/ai-developer"]
+    agent -->|"Claude token,<br>exchanged by Anthropic"| claude["Claude API workspace<br>with a $100<br>monthly limit"]
+    agent -->|"Azure DevOps token:<br>pushes only<br>branches it made"| branch["Its item's branch<br>and PR in GroundWerk"]
+    agent --x|"Contribute denied"| main["main"]
+    branch -->|"a person approves<br>and completes it"| main
+```
+
 - It signs in as groundwerk-ai-developer through the ai-developer service connection, of the Azure DevOps type, which uses workload identity federation, so nothing it uses is stored. The pipeline step asks the Azure CLI for two Entra tokens: one for Azure DevOps, which git push and the Azure DevOps MCP server use, and one for the claude-api-audience app registration, which Anthropic's workload identity federation exchanges for Claude API access in the ai-developer Console workspace. That workspace has a $100 monthly spend limit, and the run stops when the credits run out instead of retrying.
 - Its permissions come from the AI Developers group: Readers, plus Create branch and Contribute to pull requests on GroundWerk, Contribute denied on main, and Edit work items. A branch's creator gets Contribute on that branch alone, so it pushes only to branches it made. It can't complete a PR into main, so a person completes its PRs.
 - Only pipeline ai-developer may use the connection, and only from main. The pipeline has no CI trigger, so a person runs it by hand, and it takes only an item a person has tagged ai-developer.

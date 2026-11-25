@@ -8,6 +8,17 @@ GroundWerk takes GroundWerk.InnerSource's packages from the innersource feed, wh
 
 ## Decision
 
+```mermaid
+flowchart LR
+    tag["Version tag on<br>GroundWerk.InnerSource's<br>main"] --> ci["innersource-ci:<br>only its push job,<br>which runs no repo code,<br>signs in to the feed"]
+    ci --> feed["innersource feed,<br>which only the<br>project can read"]
+    tag -->|"mirror-to-github pushes it,<br>06:00 UTC or by hand"| build["On GitHub, workflow<br>publish-to-nuget-org:<br>its build job checks the<br>tag is on main and<br>runs build.cs"]
+    build --> publish["Its publish job, in<br>environment nuget-org,<br>runs no repo code and<br>trades its OIDC token<br>for a 1-hour key"]
+    publish --> nugetorg["nuget.org"]
+    nugetorg -->|"Renovate finds<br>the version"| renovate["Renovate's PR<br>in GroundWerk"]
+    nugetorg -->|"restores with<br>no sign-in"| groundwerk["GroundWerk, whose<br>nuget.config names<br>only nuget.org"]
+```
+
 - Workflow publish-to-nuget-org, in GroundWerk.InnerSource's .github/workflows, runs only on GitHub, when the mirror pushes a version tag or when a person runs it on one. Its build job checks that the tag is on main, runs build.cs on that commit and checks that the tag is a version and that each package has it. Its publish job, in environment nuget-org, which only v* tags may deploy to, takes those packages and runs none of the repo's code: NuGet/login trades the job's OIDC token for a key through the Trusted Publishing policy that the nuget.org account holds for that repo, workflow file and environment, and dotnet nuget push pushes them with --skip-duplicate. Each action is pinned to its release's commit ID.
 - The environment's secret NUGET_USER holds the nuget.org account's name, and the packages' links to the repo come from GitHub's own variables, so no file names either account.
 - Each repo's LICENSE is the MIT license, and each package carries it.
