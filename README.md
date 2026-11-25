@@ -21,7 +21,7 @@ flowchart LR
 
 Each part has an ADR in docs/adr, which records the decision and the alternative it was chosen over.
 
-- **Gated pull requests.** Every change is a PR, and a person approves every merge. Unless a PR changes only Markdown files or the docs folder, its build runs the tests, scans the commits for secrets with gitleaks and has to pass SonarQube Cloud's quality gate ([ADR 8](docs/adr/0008-pr-build-gates-on-sonarqube-and-gitleaks.md)).
+- **Gated pull requests.** Every change is a PR, and a person approves every merge. In this repo, unless a PR changes only Markdown files or the docs folder, its build runs the tests, scans the commits for secrets with gitleaks and has to pass SonarQube Cloud's quality gate ([ADR 8](docs/adr/0008-pr-build-gates-on-sonarqube-and-gitleaks.md)).
 - **One build everywhere.** `dotnet run build.cs` builds and tests the same way on every machine and in the pipelines ([ADR 5](docs/adr/0005-one-build-script.md)), in one image for the dev container and the build ([ADR 7](docs/adr/0007-one-dev-and-build-image.md)).
 - **Azure DevOps as code.** The Terraform in infra/azdo sets up Azure DevOps itself, from the repos' branch policies to the pipelines and their permissions, and environment names come from a private Settings repo, so the public files hold none ([ADR 12](docs/adr/0012-environment-names-come-from-settings.md)).
 - **Dependencies kept current.** Renovate opens the PRs that keep packages and pipeline templates up to date, as its own identity, and builds hold to minimum versions ([ADR 10](docs/adr/0010-renovate-and-minimum-versions.md)).
